@@ -19,7 +19,7 @@ const DEFAULT_DISPLAY = {
   show_last_match:  true,
   show_streak:      true,
   widget_width:     300,
-  refresh_rank:     30,
+  refresh_rank:     60,
 };
 
 function loadFileConfig() {
@@ -144,7 +144,7 @@ app.get("/api/rank", async (req, res) => {
   if (!apiKey) return res.status(400).json({ error: "Clé API Riot manquante — configure sur /setup.html" });
 
   const now = Date.now();
-  if (rankCache.data && now - rankCache.ts < 30000) return res.json(rankCache.data);
+  if (rankCache.data && now - rankCache.ts < 60000) return res.json(rankCache.data);
 
   try {
     const puuid = await getPUUID(name, tag, server, apiKey);
@@ -163,15 +163,18 @@ app.get("/api/rank", async (req, res) => {
       const result = {
         rank: "Unranked", tier: "UNRANKED", division: "", lp: 0,
         wins: 0, losses: 0,
-        rank_icon: "https://raw.communitydragon.org/latest/plugins/rcp-fe-lol-shared-components/global/default/images/ranked-emblem/emblem-iron.png",
+        rank_icon: "https://raw.communitydragon.org/latest/plugins/rcp-fe-lol-shared-components/global/default/images/ranked-mini-crests/iron.png",
+
         player: `${name}#${tag}`,
       };
       rankCache = { data: result, ts: now };
       return res.json(result);
     }
 
+    const VALID_TIERS = ["iron","bronze","silver","gold","platinum","emerald","diamond","master","grandmaster","challenger"];
     const tierName = (solo.tier || "").toLowerCase();
-    const iconUrl  = `https://raw.communitydragon.org/latest/plugins/rcp-fe-lol-shared-components/global/default/images/ranked-emblem/emblem-${tierName || "iron"}.png`;
+    const safeTier = VALID_TIERS.includes(tierName) ? tierName : "iron";
+    const iconUrl  = `https://raw.communitydragon.org/latest/plugins/rcp-fe-lol-shared-components/global/default/images/ranked-mini-crests/${safeTier}.png`;
 
     const result = {
       rank:      `${solo.tier} ${solo.rank}`,

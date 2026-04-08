@@ -240,14 +240,6 @@ iframe#preview {
           </select>
         </div>
       </div>
-      <div class="field">
-        <label>Clé API Riot (obligatoire)</label>
-        <input type="password" id="riotApiKey" placeholder="RGAPI-xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx" autocomplete="off">
-        <div class="hint">
-          Obtiens une clé gratuite sur <a href="https://developer.riotgames.com" target="_blank">developer.riotgames.com</a> (Developer key, valide 24h).<br>
-          Pour un usage permanent, demande une Production key.
-        </div>
-      </div>
     </div>
 
     <!-- Display -->
@@ -277,8 +269,8 @@ iframe#preview {
       <div class="field">
         <label>Intervalle de refresh du rang (secondes)</label>
         <div class="range-wrap">
-          <input type="range" id="refreshRank" min="15" max="120" step="5" value="30">
-          <span class="range-val" id="refreshRankVal">30s</span>
+          <input type="range" id="refreshRank" min="30" max="180" step="15" value="60">
+          <span class="range-val" id="refreshRankVal">60s</span>
         </div>
       </div>
     </div>
@@ -386,8 +378,6 @@ function updateStatus(cfg) {
   const chip = document.getElementById('statusChip');
   if (!cfg.riot_name || !cfg.riot_tag) {
     chip.className = 'status-chip nok'; chip.textContent = 'Non configuré';
-  } else if (!cfg.has_api_key) {
-    chip.className = 'status-chip nokey'; chip.textContent = 'Clé API manquante';
   } else {
     chip.className = 'status-chip ok'; chip.textContent = cfg.riot_name + '#' + cfg.riot_tag;
   }
@@ -486,9 +476,6 @@ document.getElementById('saveBtn').addEventListener('click', async () => {
     },
   };
 
-  const apiKeyVal = document.getElementById('riotApiKey').value.trim();
-  if (apiKeyVal) body.riot_api_key = apiKeyVal;
-
   if (passwordRequired) {
     body.password = document.getElementById('password').value;
   }
@@ -504,7 +491,7 @@ document.getElementById('saveBtn').addEventListener('click', async () => {
     } else {
       msg.className = 'ok'; msg.textContent = '✓ Sauvegardé !';
       schedulePreviewRefresh();
-      updateStatus({ riot_name: body.riot_name, riot_tag: body.riot_tag, has_api_key: !!apiKeyVal });
+      updateStatus({ riot_name: body.riot_name, riot_tag: body.riot_tag });
       setTimeout(() => msg.textContent = '', 3000);
     }
   } catch(e) {
