@@ -250,9 +250,8 @@ async function refreshRank() {
 
     // Rank icon
     const ico = document.getElementById('ico');
-    ico.style.display = 'block';
     ico.src = d.rank_icon;
-    ico.onerror = () => { ico.style.display = 'none'; };
+    ico.style.display = 'block';
 
     // Winrate badge
     if (d.wins !== undefined && d.losses !== undefined) {

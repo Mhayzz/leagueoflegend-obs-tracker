@@ -287,36 +287,44 @@ app.get("/api/debug", async (req, res) => {
   res.json({ player: `${name}#${tag}`, server, ...results });
 });
 
-// ── Rank icon proxy ──────────────────────────────────────────
-const ICON_CACHE = new Map();
-const TIER_CDN_URLS = (tier) => [
-  `https://raw.communitydragon.org/latest/plugins/rcp-fe-lol-shared-components/global/default/images/ranked-mini-crests/${tier}.png`,
-  `https://ddragon.leagueoflegends.com/cdn/img/ranked-emblems/Emblem_${tier.charAt(0).toUpperCase()+tier.slice(1)}.png`,
-];
+// ── Rank icon SVG (zéro dépendance externe) ──────────────────
+const TIER_STYLES = {
+  iron:        { bg: ["#3a3a3a","#6b6b6b"], border: "#8a8a8a", letter: "I" },
+  bronze:      { bg: ["#6b3a1f","#a0522d"], border: "#cd7f32", letter: "B" },
+  silver:      { bg: ["#5a6475","#8c9bb5"], border: "#b0bec5", letter: "S" },
+  gold:        { bg: ["#7a5c10","#c89b3c"], border: "#ffd700", letter: "G" },
+  platinum:    { bg: ["#1a5f5c","#3cbdb8"], border: "#4dd0e1", letter: "P" },
+  emerald:     { bg: ["#1a5c35","#2e8b57"], border: "#50c878", letter: "E" },
+  diamond:     { bg: ["#1a3f6b","#3a7ab5"], border: "#7ec8e3", letter: "D" },
+  master:      { bg: ["#4a1a7a","#7b2d8b"], border: "#c084fc", letter: "M" },
+  grandmaster: { bg: ["#7a1a1a","#b71c1c"], border: "#ff5252", letter: "GM" },
+  challenger:  { bg: ["#0d3366","#1565c0"], border: "#82b1ff", letter: "C" },
+  unranked:    { bg: ["#1a1a2e","#2d2d4a"], border: "#444466", letter: "?" },
+};
 
-app.get("/api/rank-icon/:tier", async (req, res) => {
+app.get("/api/rank-icon/:tier", (req, res) => {
   const tier = req.params.tier.toLowerCase();
-  if (ICON_CACHE.has(tier)) {
-    const cached = ICON_CACHE.get(tier);
-    res.set("Content-Type", "image/png");
-    res.set("Cache-Control", "public, max-age=86400");
-    return res.send(cached);
-  }
-  const urls = TIER_CDN_URLS(tier);
-  for (const url of urls) {
-    try {
-      const r = await fetch(url, {
-        headers: { "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 Chrome/120 Safari/537.36" }
-      });
-      if (!r.ok) continue;
-      const buf = Buffer.from(await r.arrayBuffer());
-      ICON_CACHE.set(tier, buf);
-      res.set("Content-Type", "image/png");
-      res.set("Cache-Control", "public, max-age=86400");
-      return res.send(buf);
-    } catch(e) { continue; }
-  }
-  res.status(404).send("Icon not found");
+  const s = TIER_STYLES[tier] || TIER_STYLES.unranked;
+  const fs = s.letter.length > 1 ? 26 : 34;
+  const svg = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 80 80">
+  <defs>
+    <linearGradient id="g" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="${s.bg[0]}"/>
+      <stop offset="100%" stop-color="${s.bg[1]}"/>
+    </linearGradient>
+    <filter id="sh"><feDropShadow dx="0" dy="2" stdDeviation="3" flood-color="rgba(0,0,0,0.5)"/></filter>
+  </defs>
+  <polygon points="40,4 76,22 76,58 40,76 4,58 4,22"
+    fill="url(#g)" stroke="${s.border}" stroke-width="2.5" filter="url(#sh)"/>
+  <polygon points="40,12 68,27 68,53 40,68 12,53 12,27"
+    fill="none" stroke="${s.border}" stroke-width="1" opacity="0.35"/>
+  <text x="40" y="${s.letter.length > 1 ? 49 : 51}" text-anchor="middle"
+    fill="white" font-size="${fs}" font-weight="700" font-family="Arial,sans-serif"
+    filter="url(#sh)">${s.letter}</text>
+</svg>`;
+  res.set("Content-Type", "image/svg+xml");
+  res.set("Cache-Control", "public, max-age=86400");
+  res.send(svg);
 });
 
 app.get("/health", (_, res) => res.send("ok"));
