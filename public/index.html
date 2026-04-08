@@ -1,0 +1,358 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<title>LoL OBS Tracker</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+* { margin:0; padding:0; box-sizing:border-box; }
+
+:root {
+  --accent: #C89B3C;
+  --card-bg: rgba(0,0,0,0.75);
+  --w: 300px;
+}
+
+body {
+  background:transparent;
+  width:var(--w);
+  overflow:hidden;
+  font-family:'DM Sans',sans-serif;
+}
+
+.container {
+  display:flex; flex-direction:column; gap:5px; padding:2px;
+  opacity:0; transform:translateY(6px);
+  transition:opacity .5s ease, transform .5s ease;
+}
+.container.show { opacity:1; transform:translateY(0); }
+
+.card {
+  border-radius:10px;
+  background:var(--card-bg);
+  backdrop-filter:blur(14px);
+  -webkit-backdrop-filter:blur(14px);
+  border:1px solid rgba(255,255,255,0.07);
+  overflow:hidden;
+}
+
+/* ── Rank card ─────────────────────────────────────────── */
+.rank-card {
+  display:flex; align-items:center; gap:10px;
+  padding:10px 14px 10px 10px;
+}
+.rank-icon {
+  flex-shrink:0; width:46px; height:46px;
+  display:flex; align-items:center; justify-content:center;
+}
+.rank-icon img {
+  width:46px; height:46px; object-fit:contain;
+  filter:drop-shadow(0 2px 8px rgba(0,0,0,.6));
+}
+.rank-info { flex:1; display:flex; flex-direction:column; gap:4px; }
+.rank-name { font-weight:600; font-size:16px; color:#fff; line-height:1; }
+
+.session-lp {
+  font-size:9px; font-weight:600; letter-spacing:.7px;
+  text-transform:uppercase; color:rgba(255,255,255,.3);
+  line-height:1; margin-top:1px;
+}
+.session-lp .val { font-family:'DM Mono',monospace; }
+.session-lp .pos { color:rgba(95,255,181,.8); }
+.session-lp .neg { color:rgba(255,80,96,.8); }
+
+.lp-row { display:flex; align-items:center; gap:6px; }
+.lp-label {
+  font-family:'DM Mono',monospace; font-size:11px;
+  color:rgba(255,255,255,.35); min-width:34px;
+}
+.track { flex:1; height:2px; background:rgba(255,255,255,.1); border-radius:2px; overflow:hidden; }
+.fill {
+  height:100%; border-radius:2px;
+  background:var(--accent);
+  opacity:.6;
+  transition:width 1.2s cubic-bezier(.4,0,.2,1);
+}
+
+.winrate-badge {
+  font-family:'DM Mono',monospace; font-size:11px; font-weight:500;
+  min-width:44px; text-align:right; line-height:1; flex-shrink:0;
+  color:rgba(255,255,255,.35);
+}
+.winrate-badge .sub {
+  display:block; font-size:8px; letter-spacing:1px;
+  opacity:.5; margin-top:2px; text-align:right;
+  font-family:'DM Sans',sans-serif;
+}
+.winrate-badge.good { color:#5fffb5; }
+.winrate-badge.bad  { color:#ff5060; }
+
+/* hot streak flame */
+.hot-streak {
+  font-size:13px; margin-left:4px; vertical-align:middle;
+  filter:drop-shadow(0 0 4px rgba(255,150,0,.8));
+}
+
+/* ── Match card ──────────────────────────────────────────── */
+.match-card {
+  display:flex; align-items:center; gap:9px;
+  padding:7px 14px 7px 10px;
+}
+.match-champ-wrap {
+  flex-shrink:0; width:30px; height:30px; border-radius:50%;
+  overflow:hidden; background:rgba(255,255,255,.06);
+  display:flex; align-items:center; justify-content:center;
+  border:1px solid rgba(200,155,60,.2);
+}
+.match-champ-wrap img { width:34px; height:34px; object-fit:cover; margin:-2px; }
+.match-info { flex:1; min-width:0; }
+.match-champ-name { font-size:12px; font-weight:600; color:rgba(255,255,255,.85); line-height:1; }
+.match-kda-cs {
+  font-family:'DM Mono',monospace; font-size:9px;
+  color:rgba(255,255,255,.3); margin-top:2px;
+  white-space:nowrap; overflow:hidden; text-overflow:ellipsis;
+}
+.match-result {
+  font-size:10px; font-weight:700; letter-spacing:.8px;
+  padding:3px 8px; border-radius:5px; flex-shrink:0;
+}
+.match-result.win  { color:#5fffb5; background:rgba(95,255,181,.1); }
+.match-result.loss { color:#ff5060; background:rgba(255,80,96,.1); }
+.match-result.draw { color:rgba(255,255,255,.3); background:rgba(255,255,255,.05); }
+
+/* ── Streak card ─────────────────────────────────────────── */
+.streak-card {
+  display:flex; align-items:center;
+  padding:8px 14px; gap:5px;
+}
+.streak-label {
+  font-size:9px; font-weight:600; letter-spacing:1px;
+  text-transform:uppercase; color:rgba(255,255,255,.2);
+  margin-right:4px; flex-shrink:0;
+}
+.streak-dots { display:flex; gap:4px; align-items:center; }
+.s-dot {
+  width:22px; height:5px; border-radius:3px;
+  transition:background .3s;
+}
+.s-dot.win   { background:#5fffb5; opacity:.75; }
+.s-dot.loss  { background:#ff5060; opacity:.75; }
+.s-dot.draw  { background:rgba(255,255,255,.2); }
+.s-dot.empty { background:rgba(255,255,255,.07); }
+
+/* ── Animations ──────────────────────────────────────────── */
+@keyframes pop {
+  0%   { transform:scale(.8); opacity:0; }
+  60%  { transform:scale(1.1); }
+  100% { transform:scale(1); opacity:1; }
+}
+.pop-anim { animation:pop .35s ease; }
+</style>
+</head>
+<body>
+
+<div class="container" id="container">
+  <!-- Rank -->
+  <div class="card rank-card">
+    <div class="rank-icon">
+      <img id="ico" src="" alt="" style="display:none">
+    </div>
+    <div class="rank-info">
+      <div class="rank-name" id="rankName">—</div>
+      <div class="session-lp" id="sessionLP" style="display:none"></div>
+      <div class="lp-row">
+        <div class="lp-label" id="lpLabel">0 LP</div>
+        <div class="track"><div class="fill" id="fill" style="width:0%"></div></div>
+      </div>
+    </div>
+    <div class="winrate-badge" id="winrateBadge">
+      <span id="winrateNum">—</span>
+      <span class="sub">W/R</span>
+    </div>
+  </div>
+
+  <!-- Last match -->
+  <div class="card match-card" id="matchCard" style="display:none">
+    <div class="match-champ-wrap">
+      <img id="matchIcon" src="" alt="" style="display:none">
+    </div>
+    <div class="match-info">
+      <div class="match-champ-name" id="matchChamp">—</div>
+      <div class="match-kda-cs" id="matchKda">—</div>
+    </div>
+    <div class="match-result draw" id="matchResult">?</div>
+  </div>
+
+  <!-- Streak -->
+  <div class="card streak-card" id="streakCard" style="display:none">
+    <span class="streak-label">STREAK</span>
+    <div class="streak-dots" id="streakDots"></div>
+  </div>
+</div>
+
+<script>
+let cfg = null;
+let firstLoad = true;
+const SS_KEY = 'lol_session_start_lp';
+
+function applyDisplay(d) {
+  const r = document.documentElement;
+  r.style.setProperty('--card-bg', `rgba(0,0,0,${d.bg_opacity ?? 0.75})`);
+  r.style.setProperty('--accent', d.accent_color || '#C89B3C');
+  r.style.setProperty('--w', (d.widget_width || 300) + 'px');
+  document.body.style.width = (d.widget_width || 300) + 'px';
+}
+
+// ── Session LP ──────────────────────────────────────────────
+let sessionStartLP = null;
+
+function initSessionLP(lp) {
+  const stored = sessionStorage.getItem(SS_KEY);
+  sessionStartLP = stored !== null ? parseInt(stored, 10) : lp;
+  if (stored === null) sessionStorage.setItem(SS_KEY, lp);
+  renderSessionLP(lp);
+}
+
+function renderSessionLP(lp) {
+  if (!(cfg?.display?.show_session_lp ?? true)) return;
+  if (sessionStartLP === null) return;
+  const diff = lp - sessionStartLP;
+  const el = document.getElementById('sessionLP');
+  if (diff === 0) { el.style.display = 'none'; return; }
+  const cls = diff > 0 ? 'pos' : 'neg';
+  el.innerHTML = `SESSION <span class="val ${cls}">${diff > 0 ? '+' : ''}${diff} LP</span>`;
+  el.style.display = 'block';
+}
+
+// ── Rank ─────────────────────────────────────────────────────
+async function refreshRank() {
+  try {
+    const res = await fetch('/api/rank');
+    const d = await res.json();
+    if (!res.ok) {
+      document.getElementById('rankName').textContent = d.error || 'Erreur';
+      if (firstLoad) {
+        setTimeout(() => document.getElementById('container').classList.add('show'), 80);
+        firstLoad = false;
+      }
+      return;
+    }
+
+    // Rank name + hot streak
+    let rankHtml = d.rank || 'Unranked';
+    if (d.hot_streak) rankHtml += '<span class="hot-streak">🔥</span>';
+    document.getElementById('rankName').innerHTML = rankHtml;
+
+    // LP bar (cap at 100)
+    const lpVal = d.lp ?? 0;
+    document.getElementById('lpLabel').textContent = lpVal + ' LP';
+    document.getElementById('fill').style.width = Math.min(100, Math.max(0, lpVal)) + '%';
+
+    // Rank icon
+    if (d.rank_icon) {
+      const ico = document.getElementById('ico');
+      ico.style.display = 'block';
+      ico.src = d.rank_icon;
+      ico.onerror = () => { ico.style.display = 'none'; };
+    }
+
+    // Winrate badge
+    if (d.wins !== undefined && d.losses !== undefined) {
+      const total = d.wins + d.losses;
+      const wr = total > 0 ? Math.round((d.wins / total) * 100) : 0;
+      const badge = document.getElementById('winrateBadge');
+      document.getElementById('winrateNum').textContent = wr + '%';
+      badge.className = 'winrate-badge ' + (wr >= 55 ? 'good' : wr < 45 ? 'bad' : '');
+    }
+
+    initSessionLP(lpVal);
+
+    if (firstLoad) {
+      setTimeout(() => document.getElementById('container').classList.add('show'), 80);
+      firstLoad = false;
+    }
+  } catch(e) {
+    if (firstLoad) {
+      setTimeout(() => document.getElementById('container').classList.add('show'), 80);
+      firstLoad = false;
+    }
+  }
+}
+
+// ── Matches ───────────────────────────────────────────────────
+async function refreshMatches() {
+  const showMatch  = cfg?.display?.show_last_match ?? true;
+  const showStreak = cfg?.display?.show_streak     ?? true;
+  if (!showMatch && !showStreak) return;
+
+  try {
+    const size = showStreak ? 5 : 1;
+    const res = await fetch(`/api/matches?size=${size}`);
+    if (!res.ok) return;
+    const matches = await res.json();
+    if (!matches?.length) return;
+
+    // Last match card
+    if (showMatch) {
+      const m = matches[0];
+      const card = document.getElementById('matchCard');
+      card.style.display = 'flex';
+
+      const icon = document.getElementById('matchIcon');
+      if (m.champ_icon) {
+        icon.src = m.champ_icon;
+        icon.style.display = 'block';
+        icon.onerror = () => { icon.style.display = 'none'; };
+      }
+      document.getElementById('matchChamp').textContent = m.champion;
+
+      const dur = m.game_duration > 0 ? Math.floor(m.game_duration / 60) + 'm' : '';
+      const csInfo = m.cs > 0 ? ` • ${m.cs} CS` : '';
+      document.getElementById('matchKda').textContent =
+        `${m.kills}/${m.deaths}/${m.assists}${csInfo}${dur ? ' • ' + dur : ''}`;
+
+      const resultEl = document.getElementById('matchResult');
+      if (m.won === null)     { resultEl.className = 'match-result draw'; resultEl.textContent = '?'; }
+      else if (m.won)         { resultEl.className = 'match-result win';  resultEl.textContent = 'V'; }
+      else                    { resultEl.className = 'match-result loss'; resultEl.textContent = 'D'; }
+    }
+
+    // Streak dots
+    if (showStreak) {
+      const streakCard = document.getElementById('streakCard');
+      const dots = document.getElementById('streakDots');
+      streakCard.style.display = 'flex';
+      dots.innerHTML = '';
+      const filled = matches.slice(0, 5).reverse();
+      for (let i = 0; i < 5; i++) {
+        const dot = document.createElement('div');
+        const m = filled[i];
+        if (!m)             dot.className = 's-dot empty';
+        else if (m.won === true)  dot.className = 's-dot win';
+        else if (m.won === false) dot.className = 's-dot loss';
+        else                dot.className = 's-dot draw';
+        dots.appendChild(dot);
+      }
+    }
+  } catch(e) {}
+}
+
+// ── Init ──────────────────────────────────────────────────────
+async function init() {
+  try {
+    const res = await fetch('/api/config');
+    cfg = await res.json();
+    applyDisplay(cfg.display || {});
+  } catch(e) {}
+
+  const interval = (cfg?.display?.refresh_rank || 30) * 1000;
+  refreshRank();
+  refreshMatches();
+  setInterval(refreshRank,    interval);
+  setInterval(refreshMatches, 120000);
+}
+
+init();
+</script>
+</body>
+</html>
