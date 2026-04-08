@@ -58,10 +58,14 @@ let rankCache  = { data: null, ts: 0 };
 let matchCache = { data: null, ts: 0, size: 0 };
 let puuidCache = { data: null, ts: 0, name: "", tag: "" };
 
+// Suivi du LP pour calculer le gain/perte de la dernière partie
+let lpTracker = { lp: null, last_change: null }; // last_change = diff détectée
+
 function invalidateCaches() {
   rankCache  = { data: null, ts: 0 };
   matchCache = { data: null, ts: 0, size: 0 };
   puuidCache = { data: null, ts: 0, name: "", tag: "" };
+  lpTracker  = { lp: null, last_change: null };
 }
 
 // ── Riot API helpers ─────────────────────────────────────────
@@ -175,17 +179,25 @@ app.get("/api/rank", async (req, res) => {
     const safeTier = VALID_TIERS.includes(tierName) ? tierName : "iron";
     const iconUrl = `/icons/${safeTier}.png`;
 
+    // Calcul du LP change depuis la dernière partie détectée
+    const currentLP = solo.leaguePoints;
+    if (lpTracker.lp !== null && currentLP !== lpTracker.lp) {
+      lpTracker.last_change = currentLP - lpTracker.lp;
+    }
+    lpTracker.lp = currentLP;
+
     const result = {
-      rank:      `${solo.tier} ${solo.rank}`,
-      tier:      solo.tier,
-      division:  solo.rank,
-      lp:        solo.leaguePoints,
-      wins:      solo.wins,
-      losses:    solo.losses,
+      rank:       `${solo.tier} ${solo.rank}`,
+      tier:       solo.tier,
+      division:   solo.rank,
+      lp:         currentLP,
+      lp_change:  lpTracker.last_change,
+      wins:       solo.wins,
+      losses:     solo.losses,
       hot_streak: solo.hotStreak || false,
-      veteran:   solo.veteran || false,
-      rank_icon: iconUrl,
-      player:    `${name}#${tag}`,
+      veteran:    solo.veteran || false,
+      rank_icon:  iconUrl,
+      player:     `${name}#${tag}`,
     };
     rankCache = { data: result, ts: now };
     res.json(result);

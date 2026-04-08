@@ -52,14 +52,14 @@ body {
 .rank-info { flex:1; display:flex; flex-direction:column; gap:4px; }
 .rank-name { font-weight:600; font-size:16px; color:#fff; line-height:1; }
 
-.session-lp {
+.lp-change {
   font-size:9px; font-weight:600; letter-spacing:.7px;
   text-transform:uppercase; color:rgba(255,255,255,.3);
   line-height:1; margin-top:1px;
 }
-.session-lp .val { font-family:'DM Mono',monospace; }
-.session-lp .pos { color:rgba(95,255,181,.8); }
-.session-lp .neg { color:rgba(255,80,96,.8); }
+.lp-change .val { font-family:'DM Mono',monospace; }
+.lp-change .pos { color:rgba(95,255,181,.8); }
+.lp-change .neg { color:rgba(255,80,96,.8); }
 
 .lp-row { display:flex; align-items:center; gap:6px; }
 .lp-label {
@@ -159,7 +159,7 @@ body {
     </div>
     <div class="rank-info">
       <div class="rank-name" id="rankName">—</div>
-      <div class="session-lp" id="sessionLP" style="display:none"></div>
+      <div class="lp-change" id="lpChange" style="display:none"></div>
       <div class="lp-row">
         <div class="lp-label" id="lpLabel">0 LP</div>
         <div class="track"><div class="fill" id="fill" style="width:0%"></div></div>
@@ -193,7 +193,6 @@ body {
 <script>
 let cfg = null;
 let firstLoad = true;
-const SS_KEY = 'lol_session_start_lp';
 
 function applyDisplay(d) {
   const r = document.documentElement;
@@ -203,24 +202,12 @@ function applyDisplay(d) {
   document.body.style.width = (d.widget_width || 300) + 'px';
 }
 
-// ── Session LP ──────────────────────────────────────────────
-let sessionStartLP = null;
-
-function initSessionLP(lp) {
-  const stored = sessionStorage.getItem(SS_KEY);
-  sessionStartLP = stored !== null ? parseInt(stored, 10) : lp;
-  if (stored === null) sessionStorage.setItem(SS_KEY, lp);
-  renderSessionLP(lp);
-}
-
-function renderSessionLP(lp) {
-  if (!(cfg?.display?.show_session_lp ?? true)) return;
-  if (sessionStartLP === null) return;
-  const diff = lp - sessionStartLP;
-  const el = document.getElementById('sessionLP');
-  if (diff === 0) { el.style.display = 'none'; return; }
-  const cls = diff > 0 ? 'pos' : 'neg';
-  el.innerHTML = `SESSION <span class="val ${cls}">${diff > 0 ? '+' : ''}${diff} LP</span>`;
+// ── LP change dernière partie ────────────────────────────────
+function renderLPChange(change) {
+  const el = document.getElementById('lpChange');
+  if (change === null || change === undefined) { el.style.display = 'none'; return; }
+  const cls = change > 0 ? 'pos' : 'neg';
+  el.innerHTML = `LAST <span class="val ${cls}">${change > 0 ? '+' : ''}${change} LP</span>`;
   el.style.display = 'block';
 }
 
@@ -267,7 +254,7 @@ async function refreshRank() {
       badge.className = 'winrate-badge ' + (wr >= 55 ? 'good' : wr < 45 ? 'bad' : '');
     }
 
-    initSessionLP(lpVal);
+    renderLPChange(d.lp_change);
 
     if (firstLoad) {
       setTimeout(() => document.getElementById('container').classList.add('show'), 80);
