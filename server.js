@@ -278,26 +278,6 @@ app.get("/api/matches", async (req, res) => {
   }
 });
 
-// ── Champion rotation (bonus) ────────────────────────────────
-app.get("/api/debug", async (req, res) => {
-  const { riot_name: name, riot_tag: tag, riot_server: server, riot_api_key: apiKey } = getCfg();
-  if (!name || !tag) return res.json({ error: "Pas de compte configuré" });
-  if (!apiKey) return res.json({ error: "Pas de clé API" });
-  const results = {};
-  try {
-    const puuid = await getPUUID(name, tag, server, apiKey);
-    results.puuid = puuid ? "OK" : "Introuvable";
-    const summoner = await getSummonerByPUUID(puuid, server, apiKey);
-    results.summoner = summoner?.id ? "OK" : "Erreur";
-    const rankUrl = `https://${server}.api.riotgames.com/lol/league/v4/entries/by-summoner/${summoner.id}`;
-    const r = await fetch(rankUrl, { headers: { "X-Riot-Token": apiKey } });
-    const entries = await r.json();
-    results.entries = entries.map(e => e.queueType);
-  } catch(e) {
-    results.error = e.message;
-  }
-  res.json({ player: `${name}#${tag}`, server, ...results });
-});
 
 // ── Rank icon SVG (zéro dépendance externe) ──────────────────
 const TIER_STYLES = {

@@ -140,6 +140,15 @@ body {
 .s-dot.draw  { background:rgba(255,255,255,.2); }
 .s-dot.empty { background:rgba(255,255,255,.07); }
 
+/* ── Not configured ──────────────────────────────────────── */
+.setup-hint {
+  display:none; padding:14px 16px; border-radius:10px;
+  background:var(--card-bg); backdrop-filter:blur(14px);
+  border:1px solid rgba(255,255,255,0.07);
+  font-size:11px; color:rgba(255,255,255,.4); line-height:1.6;
+}
+.setup-hint a { color:var(--accent); text-decoration:none; }
+
 /* ── Animations ──────────────────────────────────────────── */
 @keyframes pop {
   0%   { transform:scale(.8); opacity:0; }
@@ -152,8 +161,11 @@ body {
 <body>
 
 <div class="container" id="container">
+  <div class="setup-hint" id="setupHint">
+    ⚙️ Configure ton compte sur <a href="/setup.html">/setup.html</a>
+  </div>
   <!-- Rank -->
-  <div class="card rank-card">
+  <div class="card rank-card" id="rankCard">
     <div class="rank-icon">
       <img id="ico" src="" alt="" style="display:none">
     </div>
@@ -217,13 +229,19 @@ async function refreshRank() {
     const res = await fetch('/api/rank');
     const d = await res.json();
     if (!res.ok) {
-      document.getElementById('rankName').textContent = d.error || 'Erreur';
+      // Compte non configuré → afficher le hint de setup
+      if (res.status === 400) {
+        document.getElementById('setupHint').style.display = 'block';
+        document.getElementById('rankCard').style.display = 'none';
+      }
       if (firstLoad) {
         setTimeout(() => document.getElementById('container').classList.add('show'), 80);
         firstLoad = false;
       }
       return;
     }
+    document.getElementById('setupHint').style.display = 'none';
+    document.getElementById('rankCard').style.display = 'flex';
 
     // Rank name + hot streak
     let rankHtml = d.rank || 'Unranked';
