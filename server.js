@@ -163,7 +163,8 @@ app.get("/api/rank", async (req, res) => {
       const result = {
         rank: "Unranked", tier: "UNRANKED", division: "", lp: 0,
         wins: 0, losses: 0,
-        rank_icon: "/api/rank-icon/unranked",
+        rank_icon: "https://raw.communitydragon.org/latest/plugins/rcp-fe-lol-shared-components/global/default/images/ranked-mini-crests/iron.png",
+        rank_icon_fallback: "/api/rank-icon/iron",
         player: `${name}#${tag}`,
       };
       rankCache = { data: result, ts: now };
@@ -173,7 +174,7 @@ app.get("/api/rank", async (req, res) => {
     const VALID_TIERS = ["iron","bronze","silver","gold","platinum","emerald","diamond","master","grandmaster","challenger"];
     const tierName = (solo.tier || "").toLowerCase();
     const safeTier = VALID_TIERS.includes(tierName) ? tierName : "iron";
-    const iconUrl  = `/api/rank-icon/${safeTier}`;
+    const iconUrl = `https://raw.communitydragon.org/latest/plugins/rcp-fe-lol-shared-components/global/default/images/ranked-mini-crests/${safeTier}.png`;
 
     const result = {
       rank:      `${solo.tier} ${solo.rank}`,
@@ -185,6 +186,7 @@ app.get("/api/rank", async (req, res) => {
       hot_streak: solo.hotStreak || false,
       veteran:   solo.veteran || false,
       rank_icon: iconUrl,
+      rank_icon_fallback: `/api/rank-icon/${safeTier}`,
       player:    `${name}#${tag}`,
     };
     rankCache = { data: result, ts: now };

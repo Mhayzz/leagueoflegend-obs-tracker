@@ -248,10 +248,15 @@ async function refreshRank() {
     document.getElementById('lpLabel').textContent = lpVal + ' LP';
     document.getElementById('fill').style.width = Math.min(100, Math.max(0, lpVal)) + '%';
 
-    // Rank icon
+    // Rank icon — CDN direct, fallback SVG serveur
     const ico = document.getElementById('ico');
-    ico.src = d.rank_icon;
     ico.style.display = 'block';
+    ico.src = d.rank_icon;
+    ico.onerror = () => {
+      if (d.rank_icon_fallback && ico.src !== d.rank_icon_fallback) {
+        ico.src = d.rank_icon_fallback;
+      }
+    };
 
     // Winrate badge
     if (d.wins !== undefined && d.losses !== undefined) {
