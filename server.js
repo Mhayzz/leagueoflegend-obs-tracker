@@ -212,7 +212,7 @@ app.get("/api/matches", async (req, res) => {
     const routingRegion = REGION_ROUTES[server] || "europe";
 
     // Ranked solo games
-    const matchListUrl = `https://${routingRegion}.api.riotgames.com/lol/match/v5/matches/by-puuid/${puuid}/ids?queue=420&count=${size}`;
+    const matchListUrl = `https://${routingRegion}.api.riotgames.com/lol/match/v5/matches/by-puuid/${puuid}/ids?count=${size}`;
     const r = await fetch(matchListUrl, { headers: { "X-Riot-Token": apiKey } });
     if (!r.ok) return res.status(r.status).json({ error: `Erreur match list: ${r.status}` });
 
