@@ -102,12 +102,6 @@ async function getPUUID(name, tag, server, apiKey) {
   return j.puuid;
 }
 
-async function getSummonerByPUUID(puuid, server, apiKey) {
-  const url = `https://${server}.api.riotgames.com/lol/summoner/v4/summoners/by-puuid/${puuid}`;
-  const r = await fetch(url, { headers: { "X-Riot-Token": apiKey } });
-  if (!r.ok) throw new Error(`Summoner HTTP ${r.status}`);
-  return r.json();
-}
 
 // ── Config API ──────────────────────────────────────────────
 app.get("/api/config", (req, res) => {
@@ -154,10 +148,9 @@ app.get("/api/rank", async (req, res) => {
 
   try {
     const puuid = await getPUUID(name, tag, server, apiKey);
-    const summoner = await getSummonerByPUUID(puuid, server, apiKey);
-    const summonerId = summoner.id;
 
-    const rankUrl = `https://${server}.api.riotgames.com/lol/league/v4/entries/by-summoner/${summonerId}`;
+    // Riot API v4 — endpoint direct par PUUID (plus besoin du summoner ID)
+    const rankUrl = `https://${server}.api.riotgames.com/lol/league/v4/entries/by-puuid/${puuid}`;
     const r = await fetch(rankUrl, { headers: { "X-Riot-Token": apiKey } });
     if (!r.ok) return res.status(r.status).json({ error: `Erreur API rank: ${r.status}` });
 
@@ -191,7 +184,6 @@ app.get("/api/rank", async (req, res) => {
       veteran:   solo.veteran || false,
       rank_icon: iconUrl,
       player:    `${name}#${tag}`,
-      summoner_icon_id: summoner.profileIconId,
     };
     rankCache = { data: result, ts: now };
     res.json(result);
