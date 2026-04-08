@@ -163,8 +163,7 @@ app.get("/api/rank", async (req, res) => {
       const result = {
         rank: "Unranked", tier: "UNRANKED", division: "", lp: 0,
         wins: 0, losses: 0,
-        rank_icon: "https://raw.communitydragon.org/latest/plugins/rcp-fe-lol-shared-components/global/default/images/ranked-mini-crests/iron.png",
-        rank_icon_fallback: "/api/rank-icon/iron",
+        rank_icon: "/icons/iron.png",
         player: `${name}#${tag}`,
       };
       rankCache = { data: result, ts: now };
@@ -174,7 +173,7 @@ app.get("/api/rank", async (req, res) => {
     const VALID_TIERS = ["iron","bronze","silver","gold","platinum","emerald","diamond","master","grandmaster","challenger"];
     const tierName = (solo.tier || "").toLowerCase();
     const safeTier = VALID_TIERS.includes(tierName) ? tierName : "iron";
-    const iconUrl = `https://raw.communitydragon.org/latest/plugins/rcp-fe-lol-shared-components/global/default/images/ranked-mini-crests/${safeTier}.png`;
+    const iconUrl = `/icons/${safeTier}.png`;
 
     const result = {
       rank:      `${solo.tier} ${solo.rank}`,
@@ -186,7 +185,6 @@ app.get("/api/rank", async (req, res) => {
       hot_streak: solo.hotStreak || false,
       veteran:   solo.veteran || false,
       rank_icon: iconUrl,
-      rank_icon_fallback: `/api/rank-icon/${safeTier}`,
       player:    `${name}#${tag}`,
     };
     rankCache = { data: result, ts: now };
@@ -330,4 +328,38 @@ app.get("/api/rank-icon/:tier", (req, res) => {
 });
 
 app.get("/health", (_, res) => res.send("ok"));
-app.listen(PORT, "0.0.0.0", () => console.log(`LoL OBS Tracker running on port ${PORT}`));
+
+// ── Téléchargement des icônes de rang au démarrage ───────────
+const ICONS_DIR = path.join(__dirname, "public", "icons");
+const TIERS = ["iron","bronze","silver","gold","platinum","emerald","diamond","master","grandmaster","challenger"];
+const ICON_SOURCES = (tier) => [
+  `https://raw.communitydragon.org/latest/plugins/rcp-fe-lol-shared-components/global/default/images/ranked-mini-crests/${tier}.png`,
+  `https://ddragon.leagueoflegends.com/cdn/img/ranked-mini-crests/${tier}.png`,
+  `https://opgg-static.akamaized.net/images/medals_new/${tier}.png`,
+];
+
+async function downloadIcons() {
+  try { fs.mkdirSync(ICONS_DIR, { recursive: true }); } catch(e) {}
+  for (const tier of TIERS) {
+    const dest = path.join(ICONS_DIR, `${tier}.png`);
+    if (fs.existsSync(dest) && fs.statSync(dest).size > 1000) continue; // déjà téléchargé
+    for (const url of ICON_SOURCES(tier)) {
+      try {
+        const r = await fetch(url, {
+          headers: { "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 Chrome/120 Safari/537.36" }
+        });
+        if (!r.ok) continue;
+        const buf = Buffer.from(await r.arrayBuffer());
+        if (buf.length < 1000) continue; // probablement pas une vraie image
+        fs.writeFileSync(dest, buf);
+        console.log(`Icon téléchargé: ${tier} (${buf.length} bytes) depuis ${url}`);
+        break;
+      } catch(e) { continue; }
+    }
+  }
+}
+
+app.listen(PORT, "0.0.0.0", () => {
+  console.log(`LoL OBS Tracker running on port ${PORT}`);
+  downloadIcons().catch(e => console.error("downloadIcons:", e.message));
+});
