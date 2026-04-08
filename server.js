@@ -19,7 +19,7 @@ const DEFAULT_DISPLAY = {
   show_last_match:  true,
   show_streak:      true,
   widget_width:     300,
-  refresh_rank:     60,
+  refresh_rank:     300,
 };
 
 function loadFileConfig() {
@@ -148,7 +148,7 @@ app.get("/api/rank", async (req, res) => {
   if (!apiKey) return res.status(400).json({ error: "Clé API Riot manquante — configure sur /setup.html" });
 
   const now = Date.now();
-  if (rankCache.data && now - rankCache.ts < 60000) return res.json(rankCache.data);
+  if (rankCache.data && now - rankCache.ts < 60000) return res.json(rankCache.data); // cache serveur toujours 60s minimum
 
   try {
     const puuid = await getPUUID(name, tag, server, apiKey);

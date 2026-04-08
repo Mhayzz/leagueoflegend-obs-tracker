@@ -143,6 +143,21 @@ input[type=color] { width:38px; height:34px; border:1px solid var(--border); bor
 .btn-row { display:flex; align-items:center; gap:12px; margin-top:4px; }
 #saveMsg { font-size:12px; }
 #saveMsg.ok  { color:#5fffb5; }
+
+/* ── Refresh picker ──────────────────────────────────────── */
+.refresh-opts { display:flex; gap:8px; }
+.refresh-opt  { flex:1; }
+.refresh-opt input[type=radio] { display:none; }
+.refresh-opt label {
+  display:block; text-align:center;
+  padding:7px 0; border-radius:7px; cursor:pointer;
+  border:1px solid var(--border); font-size:13px;
+  color:var(--muted); transition:all .2s;
+}
+.refresh-opt input:checked + label {
+  border-color:var(--accent); color:var(--accent);
+  background:rgba(200,155,60,.08);
+}
 #saveMsg.err { color:#ff5060; }
 
 /* ── Preview ──────────────────────────────────────── */
@@ -267,10 +282,20 @@ iframe#preview {
         </div>
       </div>
       <div class="field">
-        <label>Intervalle de refresh du rang (secondes)</label>
-        <div class="range-wrap">
-          <input type="range" id="refreshRank" min="30" max="180" step="15" value="60">
-          <span class="range-val" id="refreshRankVal">60s</span>
+        <label>Intervalle de refresh du rang</label>
+        <div class="refresh-opts">
+          <div class="refresh-opt">
+            <input type="radio" name="refreshRank" id="r1" value="60">
+            <label for="r1">1 min</label>
+          </div>
+          <div class="refresh-opt">
+            <input type="radio" name="refreshRank" id="r5" value="300" checked>
+            <label for="r5">5 min</label>
+          </div>
+          <div class="refresh-opt">
+            <input type="radio" name="refreshRank" id="r10" value="600">
+            <label for="r10">10 min</label>
+          </div>
         </div>
       </div>
     </div>
@@ -361,7 +386,10 @@ async function loadConfig() {
     if (d.bg_opacity   !== undefined) { document.getElementById('bgOpacity').value = d.bg_opacity;   document.getElementById('bgOpacityVal').textContent = Math.round(d.bg_opacity*100)+'%'; }
     if (d.accent_color)  { document.getElementById('accentColor').value = d.accent_color; document.getElementById('accentHex').value = d.accent_color; }
     if (d.widget_width)  { document.getElementById('widgetWidth').value = d.widget_width; document.getElementById('widgetWidthVal').textContent = d.widget_width+'px'; }
-    if (d.refresh_rank)  { document.getElementById('refreshRank').value = d.refresh_rank; document.getElementById('refreshRankVal').textContent = d.refresh_rank+'s'; }
+    if (d.refresh_rank) {
+      const radio = document.querySelector(`input[name="refreshRank"][value="${d.refresh_rank}"]`);
+      if (radio) radio.checked = true;
+    }
     if (d.show_session_lp !== undefined) document.getElementById('showSessionLP').checked = d.show_session_lp;
     if (d.show_last_match !== undefined) document.getElementById('showLastMatch').checked  = d.show_last_match;
     if (d.show_streak     !== undefined) document.getElementById('showStreak').checked     = d.show_streak;
@@ -401,9 +429,6 @@ document.getElementById('widgetWidth').addEventListener('input', e => {
   document.getElementById('preview').style.width = e.target.value+'px';
   updateObsInfo();
   schedulePreviewRefresh();
-});
-document.getElementById('refreshRank').addEventListener('input', e => {
-  document.getElementById('refreshRankVal').textContent = e.target.value+'s';
 });
 
 document.getElementById('accentColor').addEventListener('input', e => {
@@ -469,7 +494,7 @@ document.getElementById('saveBtn').addEventListener('click', async () => {
       bg_opacity:      parseFloat(document.getElementById('bgOpacity').value),
       accent_color:    document.getElementById('accentHex').value,
       widget_width:    parseInt(document.getElementById('widgetWidth').value),
-      refresh_rank:    parseInt(document.getElementById('refreshRank').value),
+      refresh_rank:    parseInt(document.querySelector('input[name="refreshRank"]:checked')?.value || 300),
       show_session_lp: document.getElementById('showSessionLP').checked,
       show_last_match: document.getElementById('showLastMatch').checked,
       show_streak:     document.getElementById('showStreak').checked,
