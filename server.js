@@ -163,8 +163,7 @@ app.get("/api/rank", async (req, res) => {
       const result = {
         rank: "Unranked", tier: "UNRANKED", division: "", lp: 0,
         wins: 0, losses: 0,
-        rank_icon: "https://raw.communitydragon.org/latest/plugins/rcp-fe-lol-shared-components/global/default/images/ranked-mini-crests/iron.png",
-
+        rank_icon: "/api/rank-icon/unranked",
         player: `${name}#${tag}`,
       };
       rankCache = { data: result, ts: now };
@@ -174,7 +173,7 @@ app.get("/api/rank", async (req, res) => {
     const VALID_TIERS = ["iron","bronze","silver","gold","platinum","emerald","diamond","master","grandmaster","challenger"];
     const tierName = (solo.tier || "").toLowerCase();
     const safeTier = VALID_TIERS.includes(tierName) ? tierName : "iron";
-    const iconUrl  = `https://raw.communitydragon.org/latest/plugins/rcp-fe-lol-shared-components/global/default/images/ranked-mini-crests/${safeTier}.png`;
+    const iconUrl  = `/api/rank-icon/${safeTier}`;
 
     const result = {
       rank:      `${solo.tier} ${solo.rank}`,
@@ -286,6 +285,38 @@ app.get("/api/debug", async (req, res) => {
     results.error = e.message;
   }
   res.json({ player: `${name}#${tag}`, server, ...results });
+});
+
+// ── Rank icon proxy ──────────────────────────────────────────
+const ICON_CACHE = new Map();
+const TIER_CDN_URLS = (tier) => [
+  `https://raw.communitydragon.org/latest/plugins/rcp-fe-lol-shared-components/global/default/images/ranked-mini-crests/${tier}.png`,
+  `https://ddragon.leagueoflegends.com/cdn/img/ranked-emblems/Emblem_${tier.charAt(0).toUpperCase()+tier.slice(1)}.png`,
+];
+
+app.get("/api/rank-icon/:tier", async (req, res) => {
+  const tier = req.params.tier.toLowerCase();
+  if (ICON_CACHE.has(tier)) {
+    const cached = ICON_CACHE.get(tier);
+    res.set("Content-Type", "image/png");
+    res.set("Cache-Control", "public, max-age=86400");
+    return res.send(cached);
+  }
+  const urls = TIER_CDN_URLS(tier);
+  for (const url of urls) {
+    try {
+      const r = await fetch(url, {
+        headers: { "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 Chrome/120 Safari/537.36" }
+      });
+      if (!r.ok) continue;
+      const buf = Buffer.from(await r.arrayBuffer());
+      ICON_CACHE.set(tier, buf);
+      res.set("Content-Type", "image/png");
+      res.set("Cache-Control", "public, max-age=86400");
+      return res.send(buf);
+    } catch(e) { continue; }
+  }
+  res.status(404).send("Icon not found");
 });
 
 app.get("/health", (_, res) => res.send("ok"));
