@@ -304,6 +304,7 @@ async function refreshMatches() {
       const m = matches[0];
       const card = document.getElementById('matchCard');
       card.style.display = 'flex';
+      card.dataset.loaded = '1';
 
       const icon = document.getElementById('matchIcon');
       if (m.champ_icon) {
@@ -329,6 +330,7 @@ async function refreshMatches() {
       const streakCard = document.getElementById('streakCard');
       const dots = document.getElementById('streakDots');
       streakCard.style.display = 'flex';
+      streakCard.dataset.loaded = '1';
       dots.innerHTML = '';
       const filled = matches.slice(0, 5).reverse();
       for (let i = 0; i < 5; i++) {
@@ -352,11 +354,44 @@ async function init() {
     applyDisplay(cfg.display || {});
   } catch(e) {}
 
+  // Also apply localStorage display if available (setup page writes here)
+  try {
+    const ld = JSON.parse(localStorage.getItem('lol_display'));
+    if (ld) { applyDisplay(ld); applyToggles(ld); }
+  } catch(e) {}
+
   const interval = (cfg?.display?.refresh_rank || 30) * 1000;
   refreshRank();
   refreshMatches();
   setInterval(refreshRank,    interval);
   setInterval(refreshMatches, 120000);
+
+  // Poll localStorage for instant toggle/display updates from setup page
+  let lastDisplayJson = localStorage.getItem('lol_display');
+  setInterval(() => {
+    const cur = localStorage.getItem('lol_display');
+    if (cur !== lastDisplayJson) {
+      lastDisplayJson = cur;
+      try {
+        const d = JSON.parse(cur);
+        if (d) { applyDisplay(d); applyToggles(d); }
+      } catch(e) {}
+    }
+  }, 150);
+}
+
+function applyToggles(d) {
+  const matchCard  = document.getElementById('matchCard');
+  const streakCard = document.getElementById('streakCard');
+  const lpChange   = document.getElementById('lpChange');
+
+  if (d.show_last_match === false) matchCard.style.display = 'none';
+  else if (matchCard.dataset.loaded) matchCard.style.display = 'flex';
+
+  if (d.show_streak === false) streakCard.style.display = 'none';
+  else if (streakCard.dataset.loaded) streakCard.style.display = 'flex';
+
+  if (d.show_session_lp === false) lpChange.style.display = 'none';
 }
 
 init();

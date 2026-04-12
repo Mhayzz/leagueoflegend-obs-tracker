@@ -452,7 +452,7 @@ document.getElementById('bgOpacity').addEventListener('input', function() {
 document.getElementById('accentColor').addEventListener('input', () => { scheduleRefreshPreview(); });
 
 ['showSessionLP','showLastMatch','showStreak'].forEach(id => {
-  document.getElementById(id).addEventListener('change', () => { updateObsDims(); scheduleRefreshPreview(); });
+  document.getElementById(id).addEventListener('change', () => { saveToLocalStorage(); updateObsDims(); scheduleRefreshPreview(); });
 });
 document.getElementById('widgetWidth').addEventListener('change', () => { updateObsDims(); scheduleRefreshPreview(); });
 
