@@ -4,284 +4,230 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>LoL OBS Tracker — Setup</title>
-<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
 <style>
-*, *::before, *::after { box-sizing:border-box; margin:0; padding:0; }
-
 :root {
   --accent: #C89B3C;
-  --accent2: #785A28;
-  --bg: #0a0a0f;
-  --surface: #13131a;
-  --surface2: #1c1c26;
-  --border: rgba(255,255,255,0.07);
-  --text: #e8e8f0;
-  --muted: rgba(255,255,255,0.35);
+  --accent-dark: #785A28;
+  --text-primary: #ffffff;
+  --text-secondary: #cccccc;
+  --text-tertiary: #888888;
+  --bg-primary: #0a0a0a;
+  --bg-secondary: #1a1a1a;
+  --bg-tertiary: #252525;
+  --success: #10b981;
+  --error: #ef4444;
+  --border: rgba(255,255,255,0.1);
 }
+*{margin:0;padding:0;box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{background:var(--bg-primary);color:var(--text-primary);font-family:'Inter',sans-serif;min-height:100vh;-webkit-font-smoothing:antialiased;overflow-x:hidden}
 
-body {
-  background:var(--bg); color:var(--text);
-  font-family:'DM Sans',sans-serif; font-size:14px;
-  min-height:100vh;
-}
+.layout{display:grid;grid-template-columns:1fr 380px;gap:32px;max-width:1400px;margin:0 auto;padding:60px 40px 100px;align-items:start}
+@media(max-width:1024px){.layout{grid-template-columns:1fr;gap:40px;padding:40px 24px 80px}.col-right{order:-1}}
+@media(max-width:640px){.layout{gap:20px;padding:20px 12px 60px}.header h1{font-size:28px}.header h1 .by-greg{display:block;margin-left:0;margin-top:4px;font-size:14px}.header p{font-size:13px}.card{padding:20px;border-radius:12px}.section-title{font-size:10px}.field-row{flex-direction:column;align-items:stretch;gap:0}.field-sep{text-align:center;padding:4px 0;font-size:18px}.opt-row{gap:12px}.opt-label{font-size:13px}.opt-sub{font-size:10px}.preview-wrap{padding:20px}.preview-bg{padding:12px}.preview-btns{flex-direction:column}.obs-card{padding:20px}.link-url{font-size:9px;padding:10px}.col-right{position:static}.notification{font-size:11px;padding:10px 18px;top:10px}}
 
-header {
-  background:var(--surface);
-  border-bottom:1px solid var(--border);
-  padding:16px 32px;
-  display:flex; align-items:center; gap:14px;
-}
-.header-logo {
-  width:32px; height:32px;
-  background: linear-gradient(135deg, var(--accent), var(--accent2));
-  border-radius:8px;
-  display:flex; align-items:center; justify-content:center;
-  font-size:18px;
-}
-header h1 { font-size:18px; font-weight:600; }
-header .sub { font-size:12px; color:var(--muted); margin-top:2px; }
-.status-chip {
-  margin-left:auto; font-size:11px; font-weight:600;
-  letter-spacing:.6px; text-transform:uppercase;
-  padding:4px 10px; border-radius:20px;
-}
-.status-chip.ok     { background:rgba(95,255,181,.1); color:#5fffb5; }
-.status-chip.nok    { background:rgba(255,80,96,.1);  color:#ff5060; }
-.status-chip.nokey  { background:rgba(255,160,0,.1);  color:#ffa020; }
+/* Header */
+.header{grid-column:1/-1;margin-bottom:20px}
+.header-badge{display:inline-flex;align-items:center;gap:8px;background:rgba(200,155,60,.08);border:1px solid rgba(200,155,60,.25);border-radius:8px;padding:8px 16px;margin-bottom:16px;font-size:11px;font-weight:700;letter-spacing:1.5px;color:var(--accent);text-transform:uppercase;transition:all .3s ease}
+.header-badge:hover{background:rgba(200,155,60,.12);border-color:rgba(200,155,60,.4);transform:translateX(4px)}
+.header h1{font-size:48px;font-weight:800;letter-spacing:-1px;line-height:1.1;margin-bottom:12px}
+.header h1 .by-greg{font-size:.5em;color:var(--text-secondary);margin-left:8px;font-weight:700}
+.header p{font-size:16px;color:var(--text-tertiary);margin-top:8px;line-height:1.6;max-width:500px}
 
-.layout {
-  display:grid; grid-template-columns:1fr 380px;
-  gap:24px; padding:24px 32px;
-  max-width:1100px; margin:0 auto;
-}
-@media(max-width:800px) {
-  .layout { grid-template-columns:1fr; }
-  .preview-col { order:-1; }
-  header { padding:14px 18px; }
-  .layout { padding:16px 18px; }
-}
+/* Cards */
+.card{background:var(--bg-secondary);border:1px solid var(--border);border-radius:14px;padding:32px;margin-bottom:20px;transition:all .3s ease;position:relative;overflow:hidden}
+.card:hover{background:var(--bg-tertiary);border-color:rgba(255,255,255,.2);box-shadow:0 8px 24px rgba(0,0,0,.3);transform:translateY(-2px)}
+.card:last-child{margin-bottom:0}
+.section-title{font-size:12px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:var(--text-tertiary);margin-bottom:28px;display:flex;align-items:center;gap:8px}
+.section-title::before{content:'';width:4px;height:4px;border-radius:50%;background:var(--accent)}
 
-/* ── Form ─────────────────────────────────────────── */
-.section {
-  background:var(--surface); border:1px solid var(--border);
-  border-radius:12px; padding:20px 22px; margin-bottom:16px;
-}
-.section-title {
-  font-size:11px; font-weight:700; letter-spacing:1px;
-  text-transform:uppercase; color:var(--accent);
-  margin-bottom:16px; display:flex; align-items:center; gap:8px;
-}
-.section-title::after {
-  content:''; flex:1; height:1px;
-  background: linear-gradient(to right, rgba(200,155,60,.2), transparent);
-}
+/* Form */
+.field{display:flex;flex-direction:column;gap:8px}
+.field+.field{margin-top:18px}
+.field label{font-size:13px;font-weight:600;color:var(--text-primary);display:flex;align-items:center;gap:6px}
+input[type=text],input[type=password],select{background:var(--bg-tertiary);border:1.5px solid var(--border);border-radius:10px;padding:12px 14px;font-size:14px;font-family:'Inter',sans-serif;color:var(--text-primary);outline:none;transition:all .3s ease;width:100%}
+input[type=text]:hover,input[type=password]:hover,select:hover{border-color:rgba(255,255,255,.2)}
+input[type=text]::placeholder,input[type=password]::placeholder{color:var(--text-tertiary)}
+input[type=text]:focus,input[type=password]:focus,select:focus{border-color:rgba(200,155,60,.5);box-shadow:0 0 0 3px rgba(200,155,60,.15)}
+select{cursor:pointer;appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8'%3E%3Cpath d='M1 1l5 5 5-5' stroke='rgba(255,255,255,0.4)' stroke-width='2' fill='none' stroke-linecap='round'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 12px center;padding-right:36px}
+select option{background:var(--bg-secondary);color:var(--text-primary)}
+.field-row{display:flex;align-items:flex-end;gap:8px}
+.field-sep{font-size:24px;font-weight:300;color:var(--text-tertiary);padding-bottom:10px;flex-shrink:0}
 
-.field { margin-bottom:14px; }
-.field:last-child { margin-bottom:0; }
-label { display:block; font-size:12px; color:var(--muted); margin-bottom:5px; font-weight:500; }
+/* Opt rows */
+.opt-row{display:flex;align-items:center;justify-content:space-between;padding:16px 0;border-bottom:1px solid rgba(255,255,255,.05);transition:all .3s ease}
+.opt-row:hover{background:rgba(255,255,255,.02);padding-left:8px;padding-right:8px;margin:0 -8px;border-radius:8px}
+.opt-row:last-child{border-bottom:none}
+.opt-row:first-child{padding-top:0}
+.opt-label{font-size:14px;font-weight:600;color:var(--text-primary)}
+.opt-sub{font-size:12px;color:var(--text-tertiary);margin-top:3px}
 
-input[type=text], input[type=password], select {
-  width:100%; background:var(--surface2);
-  border:1px solid var(--border); border-radius:7px;
-  color:var(--text); font-family:'DM Sans',sans-serif; font-size:13px;
-  padding:8px 11px; transition:border-color .2s;
-  appearance:none;
-}
-input[type=text]:focus, input[type=password]:focus, select:focus {
-  outline:none; border-color:rgba(200,155,60,.5);
-}
-select { background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6'%3E%3Cpath d='M0 0l5 6 5-6z' fill='rgba(255,255,255,0.3)'/%3E%3C/svg%3E"); background-repeat:no-repeat; background-position:right 11px center; padding-right:28px; }
+/* Toggle */
+.toggle{position:relative;display:inline-block;width:50px;height:28px;flex-shrink:0}
+.toggle input{opacity:0;width:0;height:0}
+.toggle-track{position:absolute;cursor:pointer;inset:0;background:rgba(255,255,255,.1);border-radius:28px;transition:all .2s ease;border:1px solid var(--border)}
+.toggle-track:before{position:absolute;content:"";width:22px;height:22px;left:3px;top:50%;transform:translateY(-50%);background:rgba(255,255,255,.6);border-radius:50%;transition:all .2s ease}
+.toggle input:checked+.toggle-track{background:var(--success);border-color:var(--success)}
+.toggle input:checked+.toggle-track:before{transform:translateX(22px) translateY(-50%);background:var(--text-primary)}
 
-.field-row { display:grid; grid-template-columns:1fr 1fr; gap:10px; }
+/* Sliders */
+.slider-row{display:flex;align-items:center;gap:14px}
+input[type=range]{flex:1;height:5px;cursor:pointer;accent-color:var(--accent);background:rgba(255,255,255,.1);border-radius:5px;border:none;outline:none;padding:0;transition:all .3s ease;-webkit-appearance:none;appearance:none}
+input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;appearance:none;width:14px;height:14px;border-radius:50%;background:var(--accent);cursor:pointer;transition:all .3s ease;box-shadow:0 2px 8px rgba(200,155,60,.4)}
+input[type=range]::-webkit-slider-thumb:hover{transform:scale(1.2);box-shadow:0 4px 12px rgba(200,155,60,.6)}
+input[type=range]::-moz-range-thumb{width:14px;height:14px;border-radius:50%;background:var(--accent);cursor:pointer;border:none;box-shadow:0 2px 8px rgba(200,155,60,.4)}
+input[type=range]:hover{background:rgba(255,255,255,.15)}
+.slider-val{font-family:'JetBrains Mono',monospace;font-size:13px;font-weight:600;color:var(--text-secondary);min-width:45px;text-align:right;background:rgba(200,155,60,.1);padding:4px 8px;border-radius:6px}
 
-/* range */
-.range-wrap { display:flex; align-items:center; gap:10px; }
-input[type=range] { flex:1; accent-color:var(--accent); }
-.range-val { font-family:'DM Mono',monospace; font-size:12px; color:var(--muted); min-width:40px; text-align:right; }
+/* Color picker */
+.color-row{display:flex;align-items:center;gap:12px}
+input[type=color]{width:50px;height:50px;padding:0!important;margin:0!important;border:0!important;border-radius:8px;cursor:pointer;outline:none!important;-webkit-appearance:none!important;appearance:none!important;box-shadow:none!important;background:none!important}
+input[type=color]::-webkit-color-swatch-wrapper{padding:0!important;margin:0!important;border:0!important}
+input[type=color]::-webkit-color-swatch{border:0!important;border-radius:8px;margin:0!important;padding:0!important}
+input[type=color]::-moz-color-swatch{border:0!important;border-radius:8px;margin:0!important;padding:0!important}
 
-/* color */
-.color-wrap { display:flex; gap:8px; align-items:center; }
-input[type=color] { width:38px; height:34px; border:1px solid var(--border); border-radius:7px; background:none; cursor:pointer; padding:2px; }
-.color-wrap input[type=text] { flex:1; font-family:'DM Mono',monospace; }
+/* Refresh picker */
+.refresh-opts{display:flex;gap:8px}
+.refresh-opt{flex:1}
+.refresh-opt input[type=radio]{display:none}
+.refresh-opt label{display:block;text-align:center;padding:10px 0;border-radius:10px;cursor:pointer;border:1px solid var(--border);font-size:13px;font-weight:600;color:var(--text-tertiary);transition:all .3s ease}
+.refresh-opt input:checked+label{border-color:var(--accent);color:var(--accent);background:rgba(200,155,60,.08)}
+.refresh-opt label:hover{background:rgba(255,255,255,.04);border-color:rgba(255,255,255,.2)}
 
-/* toggle */
-.toggles { display:flex; flex-direction:column; gap:10px; }
-.toggle-row { display:flex; justify-content:space-between; align-items:center; }
-.toggle-row label { margin:0; color:var(--text); font-size:13px; font-weight:400; }
-.toggle {
-  position:relative; width:36px; height:20px; flex-shrink:0;
-}
-.toggle input { opacity:0; width:0; height:0; }
-.toggle .track {
-  position:absolute; inset:0; border-radius:20px;
-  background:rgba(255,255,255,.1); cursor:pointer;
-  transition:background .2s;
-}
-.toggle input:checked + .track { background:var(--accent); }
-.toggle .track::after {
-  content:''; position:absolute; top:2px; left:2px;
-  width:16px; height:16px; border-radius:50%;
-  background:#fff; transition:transform .2s;
-}
-.toggle input:checked + .track::after { transform:translateX(16px); }
+/* Notification */
+.notification{position:fixed;top:20px;left:50%;transform:translateX(-50%);background:var(--success);color:#fff;padding:12px 24px;border-radius:8px;font-size:13px;font-weight:600;opacity:0;pointer-events:none;transition:opacity .3s ease;z-index:1000}
+.notification.show{opacity:1;pointer-events:auto}
 
-/* hint */
-.hint { font-size:11px; color:var(--muted); margin-top:5px; line-height:1.5; }
-.hint a { color:var(--accent); text-decoration:none; }
-.hint a:hover { text-decoration:underline; }
+/* Status bar */
+.status-bar{display:flex;align-items:center;gap:12px;padding:14px 16px;background:var(--bg-secondary);border:1px solid var(--border);border-radius:14px;margin-bottom:24px}
+.status-dot{width:10px;height:10px;border-radius:50%;flex-shrink:0}
+.status-dot.ok{background:var(--success)}
+.status-dot.err{background:var(--error)}
+.status-text{font-size:13px;color:var(--text-secondary);flex:1;line-height:1.5}
+.status-text strong{color:var(--text-primary);font-weight:700}
 
-/* button */
-.btn {
-  display:inline-flex; align-items:center; gap:7px;
-  background:var(--accent); color:#0a0a0f;
-  font-family:'DM Sans',sans-serif; font-size:13px; font-weight:600;
-  border:none; border-radius:8px; padding:9px 18px; cursor:pointer;
-  transition:opacity .2s;
-}
-.btn:hover { opacity:.85; }
-.btn:disabled { opacity:.4; cursor:not-allowed; }
-.btn-row { display:flex; align-items:center; gap:12px; margin-top:4px; }
-#saveMsg { font-size:12px; }
-#saveMsg.ok  { color:#5fffb5; }
+/* Right column */
+.col-right{position:sticky;top:80px;align-self:start}
+.preview-wrap{background:var(--bg-secondary);border:1px solid var(--border);border-radius:14px;padding:32px;margin-bottom:20px;transition:all .2s ease;position:relative;overflow:hidden}
+.preview-title{font-size:12px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:var(--text-tertiary);margin-bottom:20px;display:flex;align-items:center;gap:8px}
+.preview-title::before{content:'';width:4px;height:4px;border-radius:50%;background:var(--accent)}
+.preview-bg{border-radius:12px;padding:20px;display:flex;justify-content:center;align-items:center;min-height:100px;position:relative;overflow:hidden;border:1px solid rgba(255,255,255,.08);transition:all .2s ease;background-color:var(--bg-tertiary)}
+.preview-bg[data-bg="dark"]{background-image:none;background-color:var(--bg-tertiary)}
+.preview-bg[data-bg="grid"]{background:repeating-conic-gradient(rgba(255,255,255,.03) 0% 25%,transparent 0% 50%) 0 0/20px 20px}
+#previewFrame{border:none;border-radius:8px;display:block;position:relative;z-index:1;transition:opacity .3s ease}
+.preview-btns{display:flex;gap:8px;margin-top:12px}
+.preview-refresh,.preview-bg-btn{flex:1;padding:11px;background:rgba(255,255,255,.04);border:1px solid var(--border);border-radius:10px;cursor:pointer;font-size:12px;font-weight:600;letter-spacing:.8px;text-transform:uppercase;color:var(--text-tertiary);font-family:'Inter',sans-serif;transition:all .3s ease}
+.preview-refresh:hover,.preview-bg-btn:hover{background:rgba(255,255,255,.1);color:var(--text-secondary);border-color:rgba(255,255,255,.2)}
 
-/* ── Refresh picker ──────────────────────────────────────── */
-.refresh-opts { display:flex; gap:8px; }
-.refresh-opt  { flex:1; }
-.refresh-opt input[type=radio] { display:none; }
-.refresh-opt label {
-  display:block; text-align:center;
-  padding:7px 0; border-radius:7px; cursor:pointer;
-  border:1px solid var(--border); font-size:13px;
-  color:var(--muted); transition:all .2s;
-}
-.refresh-opt input:checked + label {
-  border-color:var(--accent); color:var(--accent);
-  background:rgba(200,155,60,.08);
-}
-#saveMsg.err { color:#ff5060; }
+/* OBS cards */
+.obs-card{background:var(--bg-secondary);border:1px solid var(--border);border-radius:14px;padding:32px;margin-bottom:20px;transition:all .2s ease;position:relative;overflow:hidden}
+.obs-title{font-size:12px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:var(--text-tertiary);margin-bottom:16px;display:flex;align-items:center;gap:8px}
+.obs-title::before{content:'';width:4px;height:4px;border-radius:50%;background:var(--accent)}
+.obs-dim{font-family:'JetBrains Mono',monospace;font-size:13px;color:var(--text-secondary);margin-bottom:8px}
+.obs-dim span{color:var(--accent);font-weight:700}
+.obs-note{font-size:12px;color:var(--text-tertiary);margin-top:12px;line-height:1.5}
 
-/* ── Preview ──────────────────────────────────────── */
-.preview-col { position:sticky; top:24px; align-self:start; }
-.preview-box {
-  background:var(--surface); border:1px solid var(--border);
-  border-radius:12px; padding:20px 22px;
-}
-.preview-title {
-  font-size:11px; font-weight:700; letter-spacing:1px;
-  text-transform:uppercase; color:var(--accent);
-  margin-bottom:16px; display:flex; align-items:center; gap:8px;
-}
-.preview-title::after {
-  content:''; flex:1; height:1px;
-  background:linear-gradient(to right, rgba(200,155,60,.2), transparent);
-}
-.preview-frame-wrap {
-  background:repeating-conic-gradient(rgba(255,255,255,.03) 0% 25%, transparent 0% 50%) 0 0/20px 20px;
-  border-radius:8px; padding:12px;
-  display:flex; justify-content:center; min-height:160px; align-items:center;
-}
-iframe#preview {
-  border:none; border-radius:8px;
-  width:300px; height:150px;
-  background:transparent;
-}
-.obs-info {
-  margin-top:14px; background:var(--surface2);
-  border:1px solid var(--border); border-radius:8px; padding:12px;
-}
-.obs-info .label { font-size:11px; color:var(--muted); margin-bottom:6px; font-weight:600; letter-spacing:.5px; text-transform:uppercase; }
-.obs-url { display:flex; gap:6px; align-items:center; }
-.obs-url code {
-  flex:1; font-family:'DM Mono',monospace; font-size:11px;
-  background:var(--bg); border:1px solid var(--border);
-  border-radius:5px; padding:5px 9px; color:var(--muted);
-  white-space:nowrap; overflow:hidden; text-overflow:ellipsis;
-}
-.copy-btn {
-  background:none; border:1px solid var(--border); border-radius:6px;
-  color:var(--muted); font-size:11px; padding:5px 10px;
-  cursor:pointer; transition:all .2s; white-space:nowrap;
-  font-family:'DM Sans',sans-serif;
-}
-.copy-btn:hover { border-color:var(--accent); color:var(--accent); }
-.dims { font-size:11px; color:var(--muted); margin-top:8px; }
-.dims span { font-family:'DM Mono',monospace; color:var(--text); }
+/* Link */
+.link-wrap{display:flex;gap:8px;align-items:center}
+.link-url{flex:1;font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--text-tertiary);padding:11px 13px;background:rgba(255,255,255,.04);border:1px solid var(--border);border-radius:10px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;transition:all .3s ease}
+.link-url:hover{background:rgba(255,255,255,.08);border-color:rgba(255,255,255,.2)}
+.copy-btn{flex-shrink:0;padding:10px 14px;border-radius:10px;background:rgba(255,255,255,.06);border:1px solid var(--border);color:var(--text-secondary);font-size:12px;font-weight:700;cursor:pointer;font-family:'Inter',sans-serif;transition:all .3s ease;white-space:nowrap}
+.copy-btn:hover{background:rgba(255,255,255,.12);color:var(--text-primary);border-color:rgba(255,255,255,.2);transform:translateY(-1px)}
+.copy-btn.copied{background:rgba(16,185,129,.12);border-color:rgba(16,185,129,.3);color:var(--success)}
 </style>
 </head>
 <body>
 
-<header>
-  <div class="header-logo">⚔️</div>
-  <div>
-    <h1>LoL OBS Tracker</h1>
-    <div class="sub">Configuration de l'overlay</div>
-  </div>
-  <div class="status-chip nok" id="statusChip">Non configuré</div>
-</header>
+<div class="notification" id="saveNotification">✓ Sauvegardé</div>
 
 <div class="layout">
-  <!-- ── LEFT COL ── -->
-  <div class="form-col">
 
-    <!-- Account -->
-    <div class="section">
+  <!-- ── HEADER ── -->
+  <div class="header">
+    <div class="header-badge">⚔ Setup & Config</div>
+    <h1>LoL OBS Tracker<span class="by-greg"> by Greg</span></h1>
+    <p>Configure et personnalise ton overlay League of Legends — sans toucher au code</p>
+  </div>
+
+  <!-- ══ COL GAUCHE ══════════════════════════════════════════ -->
+  <div class="col-left">
+
+    <!-- Status -->
+    <div class="status-bar">
+      <div class="status-dot" id="statusDot"></div>
+      <div class="status-text" id="statusText">Chargement...</div>
+    </div>
+
+    <!-- COMPTE -->
+    <div class="card">
       <div class="section-title">Compte Riot</div>
       <div class="field-row">
-        <div class="field">
-          <label>Pseudo (Riot ID)</label>
-          <input type="text" id="riotName" placeholder="Nom#Tag" autocomplete="off">
+        <div class="field" style="flex:2">
+          <label>Pseudo Riot</label>
+          <input type="text" id="riotName" placeholder="TonPseudo" spellcheck="false" autocomplete="off">
         </div>
-        <div class="field">
+        <div class="field-sep">#</div>
+        <div class="field" style="flex:1">
           <label>Tag</label>
-          <input type="text" id="riotTag" placeholder="EUW" autocomplete="off">
+          <input type="text" id="riotTag" placeholder="EUW" spellcheck="false" autocomplete="off">
         </div>
       </div>
-      <div class="field-row">
-        <div class="field">
-          <label>Serveur (region)</label>
-          <select id="riotServer">
-            <option value="euw1">EUW (Europe West)</option>
-            <option value="eun1">EUNE (Europe Nordic)</option>
-            <option value="na1">NA (North America)</option>
-            <option value="kr">KR (Korea)</option>
-            <option value="br1">BR (Brazil)</option>
-            <option value="la1">LAN (Latin America N)</option>
-            <option value="la2">LAS (Latin America S)</option>
-            <option value="jp1">JP (Japan)</option>
-            <option value="oc1">OCE (Oceania)</option>
-            <option value="tr1">TR (Turkey)</option>
-            <option value="ru">RU (Russia)</option>
-            <option value="me1">ME (Middle East)</option>
-          </select>
-        </div>
+      <div class="field">
+        <label>Serveur</label>
+        <select id="riotServer">
+          <option value="euw1">EUW (Europe West)</option>
+          <option value="eun1">EUNE (Europe Nordic)</option>
+          <option value="na1">NA (North America)</option>
+          <option value="kr">KR (Korea)</option>
+          <option value="br1">BR (Brazil)</option>
+          <option value="la1">LAN (Latin America N)</option>
+          <option value="la2">LAS (Latin America S)</option>
+          <option value="jp1">JP (Japan)</option>
+          <option value="oc1">OCE (Oceania)</option>
+          <option value="tr1">TR (Turkey)</option>
+          <option value="ru">RU (Russia)</option>
+          <option value="me1">ME (Middle East)</option>
+        </select>
       </div>
     </div>
 
-    <!-- Display -->
-    <div class="section">
-      <div class="section-title">Apparence</div>
+    <!-- AFFICHAGE -->
+    <div class="card">
+      <div class="section-title">Affichage</div>
+
+      <!-- Opacité -->
       <div class="field">
         <label>Opacité du fond</label>
-        <div class="range-wrap">
+        <div class="slider-row">
           <input type="range" id="bgOpacity" min="0" max="1" step="0.05" value="0.75">
-          <span class="range-val" id="bgOpacityVal">75%</span>
+          <span class="slider-val" id="bgOpacityVal">0.75</span>
         </div>
       </div>
-      <div class="field">
+
+      <!-- Couleur accent -->
+      <div class="field" style="margin-top:14px">
         <label>Couleur d'accent</label>
-        <div class="color-wrap">
+        <div class="color-row">
           <input type="color" id="accentColor" value="#C89B3C">
-          <input type="text"  id="accentHex"   value="#C89B3C" maxlength="7">
         </div>
       </div>
-      <div class="field">
-        <label>Largeur du widget</label>
-        <div class="range-wrap">
-          <input type="range" id="widgetWidth" min="260" max="420" step="10" value="300">
-          <span class="range-val" id="widgetWidthVal">300px</span>
-        </div>
+
+      <!-- Largeur widget -->
+      <div class="field" style="margin-top:14px">
+        <label>Largeur widget (px)</label>
+        <select id="widgetWidth">
+          <option value="260">260 px</option>
+          <option value="280">280 px</option>
+          <option value="300" selected>300 px (défaut)</option>
+          <option value="320">320 px</option>
+          <option value="360">360 px</option>
+          <option value="400">400 px</option>
+        </select>
       </div>
-      <div class="field">
+
+      <!-- Refresh interval -->
+      <div class="field" style="margin-top:14px">
         <label>Intervalle de refresh du rang</label>
         <div class="refresh-opts">
           <div class="refresh-opt">
@@ -298,236 +244,282 @@ iframe#preview {
           </div>
         </div>
       </div>
-    </div>
 
-    <!-- Toggles -->
-    <div class="section">
-      <div class="section-title">Fonctionnalités</div>
-      <div class="toggles">
-        <div class="toggle-row">
-          <label>Session LP (gain/perte depuis ouverture)</label>
+      <!-- Toggles -->
+      <div style="margin-top:16px; border-top:1px solid rgba(255,255,255,.06); padding-top:16px;">
+        <div class="opt-row">
+          <div class="opt-info">
+            <div class="opt-label">Session LP</div>
+            <div class="opt-sub">Affiche le LP gagné/perdu depuis l'ouverture du widget</div>
+          </div>
           <label class="toggle">
             <input type="checkbox" id="showSessionLP" checked>
-            <div class="track"></div>
+            <span class="toggle-track"></span>
           </label>
         </div>
-        <div class="toggle-row">
-          <label>Dernière partie (champion + KDA)</label>
+        <div class="opt-row">
+          <div class="opt-info">
+            <div class="opt-label">Dernière partie</div>
+            <div class="opt-sub">Champion joué, K/D/A et résultat (V/D)</div>
+          </div>
           <label class="toggle">
             <input type="checkbox" id="showLastMatch" checked>
-            <div class="track"></div>
+            <span class="toggle-track"></span>
           </label>
         </div>
-        <div class="toggle-row">
-          <label>Streak des 5 dernières parties</label>
+        <div class="opt-row">
+          <div class="opt-info">
+            <div class="opt-label">Streak (5 dernières parties)</div>
+            <div class="opt-sub">Barre de couleur verte/rouge par partie</div>
+          </div>
           <label class="toggle">
             <input type="checkbox" id="showStreak" checked>
-            <div class="track"></div>
+            <span class="toggle-track"></span>
           </label>
         </div>
       </div>
     </div>
 
-    <!-- Password (optional) -->
-    <div class="section" id="passwordSection" style="display:none">
-      <div class="section-title">Protection</div>
-      <div class="field">
-        <label>Mot de passe</label>
-        <input type="password" id="password" placeholder="Requis pour sauvegarder">
+  </div><!-- /col-left -->
+
+  <!-- ══ COL DROITE ══════════════════════════════════════════ -->
+  <div class="col-right">
+
+    <!-- Preview -->
+    <div class="preview-wrap">
+      <div class="preview-title">Aperçu</div>
+      <div class="preview-bg" id="previewBg" data-bg="dark">
+        <iframe id="previewFrame" src="/?preview=1" scrolling="no" height="220"></iframe>
+      </div>
+      <div class="preview-btns">
+        <button class="preview-refresh" onclick="refreshPreview()">↻ Actualiser</button>
+        <button class="preview-bg-btn" onclick="cyclePreviewBg()">◐ Changer le fond</button>
       </div>
     </div>
 
-    <!-- Save -->
-    <div class="btn-row">
-      <button class="btn" id="saveBtn">💾 Sauvegarder</button>
-      <span id="saveMsg"></span>
+    <!-- OBS Dimensions -->
+    <div class="obs-card" id="obsDimsCard">
+      <div class="obs-title">Dimensions OBS</div>
+      <div class="obs-dim">Largeur : <span id="obsDimW">300</span> px</div>
+      <div class="obs-dim">Hauteur : <span id="obsDimH">~150</span> px</div>
+      <div class="obs-note">Dans OBS → Source navigateur → décocher "Contrôler audio via OBS"</div>
     </div>
 
-  </div>
-
-  <!-- ── RIGHT COL ── -->
-  <div class="preview-col">
-    <div class="preview-box">
-      <div class="preview-title">Aperçu live</div>
-      <div class="preview-frame-wrap">
-        <iframe id="preview" src="/"></iframe>
-      </div>
-      <div class="obs-info">
-        <div class="label">URL OBS (Browser Source)</div>
-        <div class="obs-url">
-          <code id="obsUrl">/</code>
-          <button class="copy-btn" id="copyBtn">Copier</button>
-        </div>
-        <div class="dims">Dimensions suggérées : <span id="dims">300 × 150</span> px</div>
+    <!-- Link -->
+    <div class="obs-card" id="obsLinkCard">
+      <div class="obs-title">Lien overlay</div>
+      <div class="link-wrap">
+        <code class="link-url" id="overlayLink"></code>
+        <button class="copy-btn" id="copyBtn">Copier</button>
       </div>
     </div>
-  </div>
 
-</div>
+  </div><!-- /col-right -->
+
+</div><!-- /layout -->
 
 <script>
-let passwordRequired = false;
-let previewTimeout = null;
+const base = window.location.origin;
+document.getElementById('overlayLink').textContent = base + '/';
+let lastSavedAccount = null;
 
-// ── Load config ─────────────────────────────────────────────
-async function loadConfig() {
+// ── Notification ─────────────────────────────────────────────
+let saveNotifTimeout;
+function showSaveNotification() {
+  const notif = document.getElementById('saveNotification');
+  notif.classList.add('show');
+  clearTimeout(saveNotifTimeout);
+  saveNotifTimeout = setTimeout(() => notif.classList.remove('show'), 2000);
+}
+
+// ── Height calc ──────────────────────────────────────────────
+function calcHeight() {
+  let h = 72 + 4;
+  if (document.getElementById('showLastMatch').checked)  h += 50 + 5;
+  if (document.getElementById('showStreak').checked)     h += 37 + 5;
+  h += 4;
+  return h;
+}
+
+function updateObsDims() {
+  const w = parseInt(document.getElementById('widgetWidth').value) || 300;
+  document.getElementById('obsDimW').textContent = w;
+  document.getElementById('obsDimH').textContent = '~' + calcHeight();
+  document.getElementById('previewFrame').width = w;
+  document.getElementById('previewFrame').height = calcHeight() + 20;
+}
+
+// ── Preview ──────────────────────────────────────────────────
+const previewBgs = ['dark', 'grid'];
+let currentBgIndex = 0;
+function cyclePreviewBg() {
+  currentBgIndex = (currentBgIndex + 1) % previewBgs.length;
+  document.getElementById('previewBg').setAttribute('data-bg', previewBgs[currentBgIndex]);
+}
+
+function refreshPreview() {
+  const frame = document.getElementById('previewFrame');
+  const w = parseInt(document.getElementById('widgetWidth').value) || 300;
+  const h = calcHeight();
+  frame.width = w;
+  frame.height = h + 20;
+  document.getElementById('previewBg').style.minHeight = (h + 32) + 'px';
+  frame.src = '/?preview=1&t=' + Date.now();
+}
+
+let previewRefreshTimeout;
+function scheduleRefreshPreview() {
+  clearTimeout(previewRefreshTimeout);
+  previewRefreshTimeout = setTimeout(refreshPreview, 2000);
+}
+
+// ── Status bar ───────────────────────────────────────────────
+function updateStatusBar() {
+  const dot = document.getElementById('statusDot');
+  const text = document.getElementById('statusText');
+  const riotName = document.getElementById('riotName').value.trim();
+  const riotTag = document.getElementById('riotTag').value.trim();
+  const riotServer = document.getElementById('riotServer').value;
+  if (riotName && riotTag) {
+    dot.className = 'status-dot ok';
+    text.innerHTML = `Compte actif : <strong>${riotName}#${riotTag}</strong> — serveur <strong>${riotServer.toUpperCase()}</strong>`;
+  } else {
+    dot.className = 'status-dot err';
+    text.innerHTML = 'Aucun compte configuré — remplis le formulaire';
+  }
+}
+
+// ── Copy ─────────────────────────────────────────────────────
+document.getElementById('copyBtn').addEventListener('click', () => {
+  const text = document.getElementById('overlayLink').textContent;
+  const btn = document.getElementById('copyBtn');
+  const copy = () => {
+    btn.textContent = '✓ Copié'; btn.classList.add('copied');
+    setTimeout(() => { btn.textContent = 'Copier'; btn.classList.remove('copied'); }, 2000);
+  };
+  navigator.clipboard?.writeText(text).then(copy).catch(() => {
+    const ta = document.createElement('textarea');
+    ta.value = text; document.body.appendChild(ta); ta.select();
+    document.execCommand('copy'); document.body.removeChild(ta); copy();
+  });
+});
+
+// ── Form data ────────────────────────────────────────────────
+function getDisplayFromForm() {
+  return {
+    bg_opacity:      parseFloat(document.getElementById('bgOpacity').value),
+    accent_color:    document.getElementById('accentColor').value,
+    widget_width:    parseInt(document.getElementById('widgetWidth').value),
+    refresh_rank:    parseInt(document.querySelector('input[name="refreshRank"]:checked')?.value || 300),
+    show_session_lp: document.getElementById('showSessionLP').checked,
+    show_last_match: document.getElementById('showLastMatch').checked,
+    show_streak:     document.getElementById('showStreak').checked,
+  };
+}
+
+// ── Auto-save ────────────────────────────────────────────────
+let autoSaveTimeout;
+async function autoSave() {
+  const riotName = document.getElementById('riotName').value.trim();
+  const riotTag  = document.getElementById('riotTag').value.trim();
+  if (!riotName || !riotTag) return;
+
+  const body = {
+    riot_name:   riotName,
+    riot_tag:    riotTag,
+    riot_server: document.getElementById('riotServer').value,
+    display:     getDisplayFromForm(),
+  };
+
   try {
-    const res = await fetch('/api/config');
-    const cfg = await res.json();
+    await fetch('/api/config', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(body),
+    });
+    showSaveNotification();
+    fetch('/api/rank').catch(() => {});
+    fetch('/api/matches?size=5').catch(() => {});
+    lastSavedAccount = `${riotName}#${riotTag}`;
+  } catch(e) {}
+}
 
-    if (cfg.riot_name)  document.getElementById('riotName').value  = cfg.riot_name;
-    if (cfg.riot_tag)   document.getElementById('riotTag').value   = cfg.riot_tag;
+function scheduleAutoSave() {
+  clearTimeout(autoSaveTimeout);
+  autoSaveTimeout = setTimeout(autoSave, 300);
+}
+
+// ── Input listeners ──────────────────────────────────────────
+document.getElementById('bgOpacity').addEventListener('input', function() {
+  document.getElementById('bgOpacityVal').textContent = parseFloat(this.value).toFixed(2);
+});
+
+['showSessionLP','showLastMatch','showStreak'].forEach(id => {
+  document.getElementById(id).addEventListener('change', () => { updateObsDims(); scheduleRefreshPreview(); });
+});
+document.getElementById('widgetWidth').addEventListener('change', () => { updateObsDims(); scheduleRefreshPreview(); });
+
+['riotName','riotTag'].forEach(id => {
+  document.getElementById(id).addEventListener('input', () => { updateStatusBar(); scheduleRefreshPreview(); });
+});
+document.getElementById('riotServer').addEventListener('change', () => { updateStatusBar(); scheduleRefreshPreview(); });
+
+// Auto-save on all inputs
+document.querySelectorAll('input[type=text],input[type=color],input[type=range],select,input[type=checkbox],input[type=radio]').forEach(el => {
+  el.addEventListener('change', scheduleAutoSave);
+  el.addEventListener('input', scheduleAutoSave);
+});
+
+// ── Load config ──────────────────────────────────────────────
+async function loadConfig() {
+  const dot = document.getElementById('statusDot');
+  const text = document.getElementById('statusText');
+  try {
+    const r = await fetch('/api/config');
+    const cfg = await r.json();
+
+    document.getElementById('riotName').value = cfg.riot_name || '';
+    document.getElementById('riotTag').value = cfg.riot_tag || '';
     if (cfg.riot_server) {
       const sel = document.getElementById('riotServer');
       if ([...sel.options].some(o => o.value === cfg.riot_server)) sel.value = cfg.riot_server;
     }
+    if (cfg.riot_name && cfg.riot_tag) lastSavedAccount = `${cfg.riot_name}#${cfg.riot_tag}`;
 
     const d = cfg.display || {};
-    if (d.bg_opacity   !== undefined) { document.getElementById('bgOpacity').value = d.bg_opacity;   document.getElementById('bgOpacityVal').textContent = Math.round(d.bg_opacity*100)+'%'; }
-    if (d.accent_color)  { document.getElementById('accentColor').value = d.accent_color; document.getElementById('accentHex').value = d.accent_color; }
-    if (d.widget_width)  { document.getElementById('widgetWidth').value = d.widget_width; document.getElementById('widgetWidthVal').textContent = d.widget_width+'px'; }
+    if (d.bg_opacity !== undefined) {
+      document.getElementById('bgOpacity').value = d.bg_opacity;
+      document.getElementById('bgOpacityVal').textContent = parseFloat(d.bg_opacity).toFixed(2);
+    }
+    if (d.accent_color) document.getElementById('accentColor').value = d.accent_color;
+    if (d.widget_width) document.getElementById('widgetWidth').value = d.widget_width;
     if (d.refresh_rank) {
       const radio = document.querySelector(`input[name="refreshRank"][value="${d.refresh_rank}"]`);
       if (radio) radio.checked = true;
     }
     if (d.show_session_lp !== undefined) document.getElementById('showSessionLP').checked = d.show_session_lp;
-    if (d.show_last_match !== undefined) document.getElementById('showLastMatch').checked  = d.show_last_match;
-    if (d.show_streak     !== undefined) document.getElementById('showStreak').checked     = d.show_streak;
+    if (d.show_last_match !== undefined) document.getElementById('showLastMatch').checked = d.show_last_match;
+    if (d.show_streak !== undefined) document.getElementById('showStreak').checked = d.show_streak;
 
-    passwordRequired = !!cfg.password_required;
-    if (passwordRequired) document.getElementById('passwordSection').style.display = 'block';
-
-    updateStatus(cfg);
-    updateObsInfo();
-  } catch(e) {}
-}
-
-function updateStatus(cfg) {
-  const chip = document.getElementById('statusChip');
-  if (!cfg.riot_name || !cfg.riot_tag) {
-    chip.className = 'status-chip nok'; chip.textContent = 'Non configuré';
-  } else {
-    chip.className = 'status-chip ok'; chip.textContent = cfg.riot_name + '#' + cfg.riot_tag;
-  }
-}
-
-// ── Live inputs ─────────────────────────────────────────────
-function schedulePreviewRefresh() {
-  clearTimeout(previewTimeout);
-  previewTimeout = setTimeout(() => {
-    const f = document.getElementById('preview');
-    f.src = f.src;
-  }, 800);
-}
-
-document.getElementById('bgOpacity').addEventListener('input', e => {
-  document.getElementById('bgOpacityVal').textContent = Math.round(e.target.value*100)+'%';
-  schedulePreviewRefresh();
-});
-document.getElementById('widgetWidth').addEventListener('input', e => {
-  document.getElementById('widgetWidthVal').textContent = e.target.value+'px';
-  document.getElementById('preview').style.width = e.target.value+'px';
-  updateObsInfo();
-  schedulePreviewRefresh();
-});
-
-document.getElementById('accentColor').addEventListener('input', e => {
-  document.getElementById('accentHex').value = e.target.value;
-  schedulePreviewRefresh();
-});
-document.getElementById('accentHex').addEventListener('input', e => {
-  const v = e.target.value;
-  if (/^#[0-9a-fA-F]{6}$/.test(v)) {
-    document.getElementById('accentColor').value = v;
-    schedulePreviewRefresh();
-  }
-});
-
-['showSessionLP','showLastMatch','showStreak'].forEach(id => {
-  document.getElementById(id).addEventListener('change', () => {
-    updateObsInfo();
-    schedulePreviewRefresh();
-  });
-});
-
-// ── OBS info ─────────────────────────────────────────────────
-function updateObsInfo() {
-  const w = parseInt(document.getElementById('widgetWidth').value) || 300;
-  const showMatch  = document.getElementById('showLastMatch').checked;
-  const showStreak = document.getElementById('showStreak').checked;
-
-  // Estimate height: rank ~72, match ~50, streak ~37, gaps ~10, padding ~4
-  let h = 72 + 4; // rank card always
-  if (showMatch)  h += 50 + 5;
-  if (showStreak) h += 37 + 5;
-  h += 4; // bottom padding
-
-  document.getElementById('dims').innerHTML = `<span>${w} × ${h}</span> px`;
-  document.getElementById('preview').style.height = h + 'px';
-
-  const base = window.location.origin;
-  const url = base + '/';
-  document.getElementById('obsUrl').textContent = url;
-}
-
-// ── Copy ─────────────────────────────────────────────────────
-document.getElementById('copyBtn').addEventListener('click', () => {
-  const url = window.location.origin + '/';
-  navigator.clipboard.writeText(url).then(() => {
-    const btn = document.getElementById('copyBtn');
-    btn.textContent = 'Copié !';
-    setTimeout(() => btn.textContent = 'Copier', 1500);
-  });
-});
-
-// ── Save ─────────────────────────────────────────────────────
-document.getElementById('saveBtn').addEventListener('click', async () => {
-  const btn = document.getElementById('saveBtn');
-  const msg = document.getElementById('saveMsg');
-  btn.disabled = true; msg.textContent = '';
-
-  const body = {
-    riot_name:   document.getElementById('riotName').value.trim(),
-    riot_tag:    document.getElementById('riotTag').value.trim().replace(/^#/, ''),
-    riot_server: document.getElementById('riotServer').value,
-    display: {
-      bg_opacity:      parseFloat(document.getElementById('bgOpacity').value),
-      accent_color:    document.getElementById('accentHex').value,
-      widget_width:    parseInt(document.getElementById('widgetWidth').value),
-      refresh_rank:    parseInt(document.querySelector('input[name="refreshRank"]:checked')?.value || 300),
-      show_session_lp: document.getElementById('showSessionLP').checked,
-      show_last_match: document.getElementById('showLastMatch').checked,
-      show_streak:     document.getElementById('showStreak').checked,
-    },
-  };
-
-  if (passwordRequired) {
-    body.password = document.getElementById('password').value;
-  }
-
-  try {
-    const res = await fetch('/api/config', {
-      method:'POST', headers:{'Content-Type':'application/json'},
-      body: JSON.stringify(body),
-    });
-    const j = await res.json();
-    if (!res.ok) {
-      msg.className = 'err'; msg.textContent = j.error || 'Erreur';
+    const hasAccount = !!(cfg.riot_name && cfg.riot_tag);
+    if (hasAccount) {
+      dot.className = 'status-dot ok';
+      text.innerHTML = `Compte actif : <strong>${cfg.riot_name}#${cfg.riot_tag}</strong> — serveur <strong>${cfg.riot_server?.toUpperCase()}</strong>`;
+      fetch('/api/rank').catch(() => {});
+      fetch('/api/matches?size=5').catch(() => {});
     } else {
-      msg.className = 'ok'; msg.textContent = '✓ Sauvegardé !';
-      schedulePreviewRefresh();
-      updateStatus({ riot_name: body.riot_name, riot_tag: body.riot_tag });
-      setTimeout(() => msg.textContent = '', 3000);
+      dot.className = 'status-dot err';
+      text.innerHTML = 'Aucun compte configuré — remplis le formulaire';
     }
+    updateObsDims();
+    refreshPreview();
   } catch(e) {
-    msg.className = 'err'; msg.textContent = 'Erreur réseau';
+    dot.className = 'status-dot err';
+    text.textContent = 'Impossible de contacter le serveur';
   }
-  btn.disabled = false;
-});
+}
 
-// ── Init ─────────────────────────────────────────────────────
 loadConfig();
-updateObsInfo();
 </script>
 </body>
 </html>
