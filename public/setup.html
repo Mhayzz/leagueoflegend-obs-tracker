@@ -87,14 +87,6 @@ input[type=color]::-webkit-color-swatch-wrapper{padding:0!important;margin:0!imp
 input[type=color]::-webkit-color-swatch{border:0!important;border-radius:8px;margin:0!important;padding:0!important}
 input[type=color]::-moz-color-swatch{border:0!important;border-radius:8px;margin:0!important;padding:0!important}
 
-/* Refresh picker */
-.refresh-opts{display:flex;gap:8px}
-.refresh-opt{flex:1}
-.refresh-opt input[type=radio]{display:none}
-.refresh-opt label{display:block;text-align:center;padding:10px 0;border-radius:10px;cursor:pointer;border:1px solid var(--border);font-size:13px;font-weight:600;color:var(--text-tertiary);transition:all .3s ease}
-.refresh-opt input:checked+label{border-color:var(--accent);color:var(--accent);background:rgba(200,155,60,.08)}
-.refresh-opt label:hover{background:rgba(255,255,255,.04);border-color:rgba(255,255,255,.2)}
-
 /* Notification */
 .notification{position:fixed;top:20px;left:50%;transform:translateX(-50%);background:var(--success);color:#fff;padding:12px 24px;border-radius:8px;font-size:13px;font-weight:600;opacity:0;pointer-events:none;transition:opacity .3s ease;z-index:1000}
 .notification.show{opacity:1;pointer-events:auto}
@@ -176,18 +168,18 @@ input[type=color]::-moz-color-swatch{border:0!important;border-radius:8px;margin
       <div class="field">
         <label>Serveur</label>
         <select id="riotServer">
-          <option value="euw1">EUW (Europe West)</option>
-          <option value="eun1">EUNE (Europe Nordic)</option>
-          <option value="na1">NA (North America)</option>
-          <option value="kr">KR (Korea)</option>
-          <option value="br1">BR (Brazil)</option>
-          <option value="la1">LAN (Latin America N)</option>
-          <option value="la2">LAS (Latin America S)</option>
-          <option value="jp1">JP (Japan)</option>
-          <option value="oc1">OCE (Oceania)</option>
-          <option value="tr1">TR (Turkey)</option>
-          <option value="ru">RU (Russia)</option>
-          <option value="me1">ME (Middle East)</option>
+          <option value="euw1">Europe West</option>
+          <option value="eun1">Europe Nordic</option>
+          <option value="na1">Amérique du Nord</option>
+          <option value="kr">Corée</option>
+          <option value="br1">Brésil</option>
+          <option value="la1">Amérique Latine Nord</option>
+          <option value="la2">Amérique Latine Sud</option>
+          <option value="jp1">Japon</option>
+          <option value="oc1">Océanie</option>
+          <option value="tr1">Turquie</option>
+          <option value="ru">Russie</option>
+          <option value="me1">Moyen-Orient</option>
         </select>
       </div>
     </div>
@@ -209,7 +201,7 @@ input[type=color]::-moz-color-swatch{border:0!important;border-radius:8px;margin
       <div class="field" style="margin-top:14px">
         <label>Couleur d'accent</label>
         <div class="color-row">
-          <input type="color" id="accentColor" value="#C89B3C">
+          <input type="color" id="accentColor" value="#ffffff">
         </div>
       </div>
 
@@ -224,25 +216,6 @@ input[type=color]::-moz-color-swatch{border:0!important;border-radius:8px;margin
           <option value="360">360 px</option>
           <option value="400">400 px</option>
         </select>
-      </div>
-
-      <!-- Refresh interval -->
-      <div class="field" style="margin-top:14px">
-        <label>Intervalle de refresh du rang</label>
-        <div class="refresh-opts">
-          <div class="refresh-opt">
-            <input type="radio" name="refreshRank" id="r1" value="60">
-            <label for="r1">1 min</label>
-          </div>
-          <div class="refresh-opt">
-            <input type="radio" name="refreshRank" id="r5" value="300" checked>
-            <label for="r5">5 min</label>
-          </div>
-          <div class="refresh-opt">
-            <input type="radio" name="refreshRank" id="r10" value="600">
-            <label for="r10">10 min</label>
-          </div>
-        </div>
       </div>
 
       <!-- Toggles -->
@@ -276,6 +249,17 @@ input[type=color]::-moz-color-swatch{border:0!important;border-radius:8px;margin
             <input type="checkbox" id="showStreak" checked>
             <span class="toggle-track"></span>
           </label>
+        </div>
+      </div>
+    </div>
+
+    <!-- THEME SETUP -->
+    <div class="card">
+      <div class="section-title">Thème du setup</div>
+      <div class="field">
+        <label>Couleur d'accentuation de la page</label>
+        <div class="color-row">
+          <input type="color" id="setupThemeColor" value="#C89B3C">
         </div>
       </div>
     </div>
@@ -370,7 +354,8 @@ function refreshPreview() {
 let previewRefreshTimeout;
 function scheduleRefreshPreview() {
   clearTimeout(previewRefreshTimeout);
-  previewRefreshTimeout = setTimeout(refreshPreview, 2000);
+  saveToLocalStorage();
+  previewRefreshTimeout = setTimeout(refreshPreview, 150);
 }
 
 // ── Status bar ───────────────────────────────────────────────
@@ -410,11 +395,14 @@ function getDisplayFromForm() {
     bg_opacity:      parseFloat(document.getElementById('bgOpacity').value),
     accent_color:    document.getElementById('accentColor').value,
     widget_width:    parseInt(document.getElementById('widgetWidth').value),
-    refresh_rank:    parseInt(document.querySelector('input[name="refreshRank"]:checked')?.value || 300),
     show_session_lp: document.getElementById('showSessionLP').checked,
     show_last_match: document.getElementById('showLastMatch').checked,
     show_streak:     document.getElementById('showStreak').checked,
   };
+}
+
+function saveToLocalStorage() {
+  localStorage.setItem('lol_display', JSON.stringify(getDisplayFromForm()));
 }
 
 // ── Auto-save ────────────────────────────────────────────────
@@ -452,7 +440,10 @@ function scheduleAutoSave() {
 // ── Input listeners ──────────────────────────────────────────
 document.getElementById('bgOpacity').addEventListener('input', function() {
   document.getElementById('bgOpacityVal').textContent = parseFloat(this.value).toFixed(2);
+  scheduleRefreshPreview();
 });
+
+document.getElementById('accentColor').addEventListener('input', () => { scheduleRefreshPreview(); });
 
 ['showSessionLP','showLastMatch','showStreak'].forEach(id => {
   document.getElementById(id).addEventListener('change', () => { updateObsDims(); scheduleRefreshPreview(); });
@@ -464,8 +455,23 @@ document.getElementById('widgetWidth').addEventListener('change', () => { update
 });
 document.getElementById('riotServer').addEventListener('change', () => { updateStatusBar(); scheduleRefreshPreview(); });
 
+// ── Setup theme color ───────────────────────────────────────
+function applySetupTheme(color) {
+  document.documentElement.style.setProperty('--accent', color);
+  localStorage.setItem('lol_setup_theme', color);
+}
+document.getElementById('setupThemeColor').addEventListener('input', function() {
+  applySetupTheme(this.value);
+});
+// Load saved theme
+const savedTheme = localStorage.getItem('lol_setup_theme');
+if (savedTheme) {
+  document.documentElement.style.setProperty('--accent', savedTheme);
+  document.getElementById('setupThemeColor').value = savedTheme;
+}
+
 // Auto-save on all inputs
-document.querySelectorAll('input[type=text],input[type=color],input[type=range],select,input[type=checkbox],input[type=radio]').forEach(el => {
+document.querySelectorAll('input[type=text],input[type=color]:not(#setupThemeColor),input[type=range],select,input[type=checkbox]').forEach(el => {
   el.addEventListener('change', scheduleAutoSave);
   el.addEventListener('input', scheduleAutoSave);
 });
@@ -493,10 +499,6 @@ async function loadConfig() {
     }
     if (d.accent_color) document.getElementById('accentColor').value = d.accent_color;
     if (d.widget_width) document.getElementById('widgetWidth').value = d.widget_width;
-    if (d.refresh_rank) {
-      const radio = document.querySelector(`input[name="refreshRank"][value="${d.refresh_rank}"]`);
-      if (radio) radio.checked = true;
-    }
     if (d.show_session_lp !== undefined) document.getElementById('showSessionLP').checked = d.show_session_lp;
     if (d.show_last_match !== undefined) document.getElementById('showLastMatch').checked = d.show_last_match;
     if (d.show_streak !== undefined) document.getElementById('showStreak').checked = d.show_streak;
