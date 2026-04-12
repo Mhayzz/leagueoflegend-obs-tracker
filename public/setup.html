@@ -108,6 +108,7 @@ input[type=color]::-moz-color-swatch{border:0!important;border-radius:8px;margin
 .preview-bg[data-bg="dark"]{background-image:none;background-color:var(--bg-tertiary)}
 .preview-bg[data-bg="grid"]{background:repeating-conic-gradient(rgba(255,255,255,.03) 0% 25%,transparent 0% 50%) 0 0/20px 20px}
 #previewFrame{border:none;border-radius:8px;display:block;position:relative;z-index:1;transition:opacity .3s ease}
+#previewFrame.fading{opacity:0}
 .preview-btns{display:flex;gap:8px;margin-top:12px}
 .preview-refresh,.preview-bg-btn{flex:1;padding:11px;background:rgba(255,255,255,.04);border:1px solid var(--border);border-radius:10px;cursor:pointer;font-size:12px;font-weight:600;letter-spacing:.8px;text-transform:uppercase;color:var(--text-tertiary);font-family:'Inter',sans-serif;transition:all .3s ease}
 .preview-refresh:hover,.preview-bg-btn:hover{background:rgba(255,255,255,.1);color:var(--text-secondary);border-color:rgba(255,255,255,.2)}
@@ -348,7 +349,12 @@ function refreshPreview() {
   frame.width = w;
   frame.height = h + 20;
   document.getElementById('previewBg').style.minHeight = (h + 32) + 'px';
-  frame.src = '/?preview=1&t=' + Date.now();
+  // Fade out, swap src, fade back in on load
+  frame.classList.add('fading');
+  setTimeout(() => {
+    frame.src = '/?preview=1&t=' + Date.now();
+    frame.onload = () => frame.classList.remove('fading');
+  }, 300);
 }
 
 let previewRefreshTimeout;
